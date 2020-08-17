@@ -1,0 +1,43 @@
+{% extends "MainApp/base.html" %}
+{% block title %}DControl - Все детали{% endblock %}
+{% block content %}
+{% load static %}
+<div class="container">
+  <h1>DControl - Все детали</h1>
+  <a href="{% url 'detail_all' %}">Все детали</a>
+  <a href="{% url 'detail_create' %}">Создать деталь</a>
+  <table class="table">
+    <thead class="thead-dark">
+      <tr>
+        <th scope="col">#</th>
+        <th scope="col">НАИМЕНОВНИЕ</th>
+        <th scope="col">ЧЕРТЕЖ</th>
+        <th scope="col">АВТОР</th>
+        <th scope="col">СОЗДАНА</th>
+        <th scope="col">МАТЕРИАЛ</th>
+        <th scope="col">СОРТАМЕНТ</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for detail in all_detail %}
+      {% if detail %}
+        <tr>
+          <th scope="row">{{detail.id}}</th>
+          <td>{{detail.title}}</td>
+          <td>
+            <a href="{{detail.draw_pdf.url}}">
+              <img  src="{{detail.draw_png.url}}" alt="..." width="200">
+            </a>
+
+          </td>
+          <td>{{detail.author}}</td>
+          <td>{{detail.create}}</td>
+          <td>{{detail.material}}</td>
+          <td>{{detail.assortment}}</td>
+        </tr>
+      {% endif %}
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
