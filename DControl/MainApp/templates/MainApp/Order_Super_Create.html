@@ -1,0 +1,16 @@
+{% extends "MainApp/base.html" %}
+{% block title %}DControl - Создание супер заказа{% endblock %}
+{% block content %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+<div class="container">
+    <h1>DControl - Создание супер заказа</h1>
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{order_form|crispy}}
+        <button class="btn-primary col" type="submit">СОЗДАТЬ</button>
+    </form>
+</div>
+
+{% endblock %}

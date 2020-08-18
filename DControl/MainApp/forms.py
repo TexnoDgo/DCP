@@ -29,7 +29,13 @@ class DetailCreateForm(forms.ModelForm):
 class OrderCreateForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ['title', 'project', 'readiness']
+        fields = ['table', 'project', 'readiness']
+
+
+class OrderSuperCreateForm(forms.ModelForm):
+    class Meta:
+        model = Order
+        fields = ['table']
 
 
 class PositionCreateForm(forms.ModelForm):
@@ -59,4 +65,4 @@ class OperationCreateForm(forms.ModelForm):
 class TransactionCreateForm(forms.ModelForm):
     class Meta:
         model = Transaction
-        fields = ['operation', 'ready_quantity']
+        fields = ['ready_quantity']

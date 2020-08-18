@@ -20,7 +20,20 @@
 
 </header>
 <body style="">
+    <div class="container">
+        <a href="{% url 'details_all' %}">Все детали</a>
+        <a href="{% url 'detail_create' %}">Создать деталь</a>
+        <a href="{% url 'orders_all' %}">Все заказы</a>
+        <a href="{% url 'order_create' %}">Создать заказ</a>
+        <a href="{% url 'order_super_create' %}">Создать супер заказ</a>
 
+        {% if user.is_authenticated %}
+          <li>User: {{ user.get_username }}</li>
+          <li><a href="{% url 'logout'%}?next={{request.path}}">Выход</a></li>
+        {% else %}
+          <li><a href="{% url 'login'%}?next={{request.path}}">Вход</a></li>
+        {% endif %}
+    </div>
     {% block content %}
 
     {% endblock %}

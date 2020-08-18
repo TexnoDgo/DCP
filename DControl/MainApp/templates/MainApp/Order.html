@@ -1,0 +1,126 @@
+{% extends "MainApp/base.html" %}
+{% block title %}DControl - Заказ № {{order.pk}}{% endblock %}
+{% block content %}
+{% load static %}
+<div class="container">
+    <h1>DControl - Заказ № {{order.pk}}</h1>
+    <table class="table table-sm table-dark">
+        <thead>
+            <tr>
+                <th>Название заказа</th>
+                <th>{{order.title}}</th>
+            </tr>
+            <tr>
+                <th>Автор заказа</th>
+                <th>{{order.author}}</th>
+            </tr>
+            <tr>
+                <th scope="col">Проект</th>
+                <th scope="col">{{order.project.title}}</th>
+            </tr>
+            <tr>
+                <th scope="col">Дата готовности</th>
+                <th scope="col">{{order.readiness}}</th>
+            </tr>
+        </thead>
+    </table>
+    <table class="table" style="font-size: 0.7em;">
+        <thead class="thead-dark">
+            <tr align="center">
+            <th scope="col">#</th>
+            <th scope="col">НАИМЕНОВНИЕ ДЕТАЛИ</th>
+            <th scope="col">КОЛИЧЕСТВО</th>
+            <th scope="col">МАТЕРИАЛ</th>
+            <th scope="col">СОРТАМЕНТ</th>
+            <th scope="col">Опытынй завод</th>
+            <th scope="col">НИИ Лазерная Резка</th>
+            <th scope="col">Альянс Сталь</th>
+            <th scope="col">CNC MetalWork</th>
+            <th scope="col">Покрытие №1</th>
+            <th scope="col">Покрытие №2</th>
+            <th scope="col">Другой</th>
+          </tr>
+        </thead>
+        <tbody>
+
+      {% for position in positions %}
+          {% if position %}
+
+            <tr align="center">
+              <th scope="row" >{{position.detail.id}}</th>
+              <td class="col">
+                  <a href="{% url 'position_view' code=position.code %}">{{position.detail.title}}</a>
+              </td>
+              <td class="col">{{position.quantity}}</td>
+              <td class="col">{{position.detail.material}}</td>
+              <td class="col">{{position.detail.assortment}}</td>
+                <td class="col">
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "Опытынй завод" %}
+                                +
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="col" >
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "НИИ Лазерная Резка" %}
+                                +
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="col">
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "Альянс Сталь" %}
+                                +
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="col">
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "CNC MetalWork" %}
+                                +
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="col">
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "Покрытие №1" %}
+                                +
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="col">
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "Покрытие №2" %}
+                                +
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+                <td class="col">
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "Другой" %}
+                                +
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </td>
+            </tr>
+          {% endif %}
+      {% endfor %}
+    </tbody>
+    </table>
+</div>
+{% endblock %}

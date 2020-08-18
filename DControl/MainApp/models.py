@@ -3,6 +3,7 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 
 
+
 class Material(models.Model):
     title = models.CharField(max_length=100, verbose_name='МАТЕРИАЛ', default='DEFAULT')  # Материал
 
@@ -41,13 +42,16 @@ class Order(models.Model):
     create = models.DateTimeField(default=timezone.now)  #
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='АВТОР ЗАКАЗА')  #
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name='НАЗНАЧЕНИЕ ЗАКАЗА')  #
-    readiness = models.DateTimeField(verbose_name='ПРИБЛИЗИТЕЛЬНЫЙ СРОК ГОТОВНОСТИ')  #
+    readiness = models.DateField(verbose_name='ПРИБЛИЗИТЕЛЬНЫЙ СРОК ГОТОВНОСТИ')  #
+    table = models.FileField(upload_to='TABLES', verbose_name='ТАБЛИЦА', null=True)
 
 
 class Position(models.Model):
     order = models.ForeignKey(Order, on_delete=models.CASCADE, verbose_name='ЗАКАЗ')  #
     detail = models.ForeignKey(Detail, on_delete=models.CASCADE, verbose_name='ДЕТАЛЬ')  #
     quantity = models.PositiveIntegerField(default=1, verbose_name='Кол-во')  #
+    code = models.CharField(max_length=32, db_index=True)
+    qr_code = models.ImageField(upload_to='QR_CODE', verbose_name='КОД ДЕТАЛИ', default='QR_CODE/default.png')
 
 
 class City(models.Model):
@@ -73,14 +77,13 @@ class Operation(models.Model):
         ('RD', 'Ready'),
     )
 
-    title = models.CharField(max_length=50, verbose_name='НАЗВАНЕ ОПЕРАЦИИ')  #
+    title = models.CharField(max_length=50, verbose_name='НАЗВАНЕ ОПЕРАЦИИ', default='DEFAULT')  #
     manufactured = models.ForeignKey(Manufactured, on_delete=models.CASCADE, verbose_name='МЕСТО ИЗГОТОВЛЕНИЯ')  #
     position = models.ForeignKey(Position, on_delete=models.CASCADE, verbose_name='ПОЗИЦИИ')  #
     status = models.CharField(max_length=20, choices=OPR_STATUS, default='CD', verbose_name='СТАТУС')  #
     # Остаток деталей. Изначально равно quantity(Check).
     # Значение изменяет Transaction.
     remaining_parts = models.PositiveIntegerField(default=1, verbose_name='КОЛ-ВО ОСТАВШИХСЯ ДЕТАЛЕЙ')
-    qr_code = models.ImageField(upload_to='QR_CODE', verbose_name='КОД ДЕТАЛИ', default='QR_CODE/default.png')
 
     def __str__(self):
         return self.title

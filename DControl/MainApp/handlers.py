@@ -1,16 +1,17 @@
 import qrcode
 import fitz
-from django.conf import settings
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def qr_generator(title):
-    detail_view_url = 'localhost:8000/detail/'
+    detail_view_url = 'http://127.0.0.1:8000/all/Position/' + title
     text = str(title)
     print(text)
-    img = qrcode.make(detail_view_url + text)
-    img_path = settings.MEDIA_URL + '/' + text + '.png'
+    img = qrcode.make(detail_view_url)
+    img_path = os.path.join(BASE_DIR, 'media/QR_CODE/') + text + '.png'
     print(img_path)
-    img2 = text + '.png'
     try:
         img.save(img_path)
     except:

@@ -6,8 +6,6 @@
 
 <div class="container">
     <h1>DControl - Создание детали</h1>
-    <a href="{% url 'detail_all' %}">Все детали</a>
-    <a href="{% url 'detail_create' %}">Создать деталь</a>
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {{form|crispy}}
