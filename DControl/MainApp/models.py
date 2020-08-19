@@ -44,6 +44,7 @@ class Order(models.Model):
     project = models.ForeignKey(Project, on_delete=models.CASCADE, verbose_name='НАЗНАЧЕНИЕ ЗАКАЗА')  #
     readiness = models.DateField(verbose_name='ПРИБЛИЗИТЕЛЬНЫЙ СРОК ГОТОВНОСТИ')  #
     table = models.FileField(upload_to='TABLES', verbose_name='ТАБЛИЦА', null=True)
+    qr_code_list = models.FileField(upload_to='QR_CODE_LIST', verbose_name='ФАЙЛ С КОДАМИ', null=True)
 
 
 class Position(models.Model):

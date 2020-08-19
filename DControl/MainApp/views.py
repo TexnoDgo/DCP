@@ -1,7 +1,10 @@
 import os
 from openpyxl import load_workbook
+
 from django.utils.crypto import get_random_string
+from django.contrib import messages
 from django.shortcuts import render, redirect
+
 from .models import (Material, Assortment, Detail,
                      Project, Order, Position, City,
                      Manufactured, Operation, Transaction)
@@ -9,7 +12,7 @@ from .forms import (ProjectCreateForm, MaterialCreateForm, AssortmentCreateForm,
                     DetailCreateForm, OrderCreateForm, OrderSuperCreateForm, PositionCreateForm,
                     CityCreateForm, ManufacturedCreateForm, OperationCreateForm,
                     TransactionCreateForm)
-from .handlers import convert_pdf_to_bnp, qr_generator
+from .handlers import convert_pdf_to_bnp, qr_generator, create_pdf
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -82,7 +85,6 @@ def order_super_create(request):
     if request.method == 'POST':
 
         order_form = OrderSuperCreateForm(request.POST, request.FILES)
-        print('post')
 
         if order_form.is_valid():
             super_order = order_form.save(commit=False)
@@ -108,6 +110,13 @@ def order_super_create(request):
                 col_0 = 4
                 # Информация о детали
                 detail_title = sheet.cell(row=row_0 + i, column=1).value
+                print(detail_title)
+                try:
+                    prov = Detail.objects.filter(title=detail_title)
+                    print('yes')
+                except:
+                    print('no')
+
                 detail_material = sheet.cell(row=row_0 + i, column=3).value
                 detail_assortment = sheet.cell(row=row_0 + i, column=4).value
                 # Информация о позициях
@@ -142,12 +151,12 @@ def order_super_create(request):
                 else:
                     i = 0
             # ----------------Информация по позициям----------------
-
-
+            pdf_file_path = create_pdf(super_order)
+            super_order.qr_code_list = pdf_file_path
+            super_order.save()
             return redirect('orders_all')
     else:
         order_form = OrderSuperCreateForm()
-        print('else')
 
     context = {
         'order_form': order_form,
@@ -200,6 +209,9 @@ def position_view(request, code):
 
 def operation_view(request, url):
     operation = Operation.objects.get(pk=url)
+    transactions = Transaction.objects.filter(operation=operation)
+
+    difference = int(operation.position.quantity) - int(operation.remaining_parts)
 
     if request.method == 'POST':
 
@@ -210,14 +222,22 @@ def operation_view(request, url):
             transaction.author = request.user
             transaction.operation = operation
             print(operation.remaining_parts)
-            operation.remaining_parts -= transaction.ready_quantity
-            print(operation.remaining_parts)
-            operation.status = 'PD'
-            if operation.remaining_parts == 0:
-                operation.status = 'RD'
-            transaction.save()
-            operation.save()
-            return redirect('orders_all')
+            if transaction.ready_quantity <= operation.remaining_parts:
+                operation.remaining_parts -= transaction.ready_quantity
+                print(operation.remaining_parts)
+                operation.status = 'PD'
+                if operation.remaining_parts == 0:
+                    operation.status = 'RD'
+                transaction.save()
+                operation.save()
+            else:
+                messages.success(request,
+                                 # Формирование сообщения со вложенным именем
+                                 f'Количество выполненных деталей больше необходимого. '
+                                 f'Пожалуйста проверьте вводимое значение или обратитесь '
+                                 f'к автору заказа! ')
+
+            return redirect(request.META['HTTP_REFERER'])
     else:
 
         form = TransactionCreateForm()
@@ -225,5 +245,13 @@ def operation_view(request, url):
     context = {
         'operation': operation,
         'form': form,
+        'difference': difference,
+        'transactions': transactions,
     }
     return render(request, 'MainApp/Operation.html', context)
+
+
+def crete_order_qr_code_list(request, url):
+    order = Order.objects.get(pk=url)
+    create_pdf(order)
+    return redirect(request.META['HTTP_REFERER'])

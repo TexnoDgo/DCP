@@ -5,11 +5,72 @@
 {% load crispy_forms_tags %}
 <div class="container">
     <h1>DControl - Операция {{operation.manufactured}}</h1>
+    <ul class="list-group list-group-horizontal" align="center">
+        <li class="list-group-item col-4">ЗАКАЗ</li>
+        <a href="{% url 'order_view' url=operation.position.order.pk %}" class="list-group-item  active list-group-item-action col-8"><h6>{{operation.position.order.title}}</h6></a>
+    </ul>
+    <ul class="list-group list-group-horizontal mt-2" align="center">
+        <li class="list-group-item col-4">ПРОЕКТ</li>
+        <a href="#" class="list-group-item list-group-item-action active col-8"><h6>{{operation.position.order.project.title}}</h6></a>
+    </ul>
+    <ul class="list-group list-group-horizontal mt-2" align="center">
+        <li class="list-group-item col-4">ДЕТАЛЬ</li>
+        <a href="{% url 'position_view' code=operation.position.code %}" class="list-group-item list-group-item-action active col-8"><h6>{{operation.position.detail.title}}</h6></a>
+    </ul>
+    <hr>
+    <table class="table mt-2">
+        <thead class="thead-dark" style="font-size: 1em;">
+            <tr align="center">
+                <th scope="col">Деталей необходимо</th>
+                <th scope="col">Деталей изготовленно</th>
+                <th scope="col">Деталей осталось</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr align="center" style="font-size: 1.5em;">
+                <th scope="col">{{operation.position.quantity}}</th>
+                <td class="col">{{difference}}</td>
+                <td class="col">{{operation.remaining_parts}}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr>
+
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {{form|crispy}}
-        <button class="btn-primary col" type="submit">СОЗДАТЬ</button>
+        <button class="btn-success col btn-lg" type="submit">СОЗДАТЬ</button>
     </form>
+
+    <hr>
+
+    {% if messages %}
+    <ul class="messages">
+        {% for message in messages %}
+            <li class="list-group-item list-group-item-danger">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
+    <table class="table" >
+        <thead class="thead-dark" style="font-size: 1em;">
+            <tr align="center">
+                <th scope="col">Автор</th>
+                <th scope="col">Дата создания</th>
+                <th scope="col">Количество</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for transaction in transactions %}
+                <tr align="center" style="font-size: 1.5em;">
+                    <th scope="col">{{transaction.author}}</th>
+                    <td class="col">{{transaction.create}}</td>
+                    <td class="col"><h3 style="color: red;">{{transaction.ready_quantity}}</h3></td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
 </div>
 {% endblock %}

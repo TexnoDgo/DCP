@@ -3,6 +3,7 @@ colorama==0.4.3
 Django==3.1
 django-crispy-forms==1.9.2
 et-xmlfile==1.0.1
+fpdf==1.7.2
 jdcal==1.4.1
 numpy==1.19.1
 openpyxl==3.0.4
@@ -11,6 +12,7 @@ PyMuPDF==1.17.5
 python-dateutil==2.8.1
 pytz==2020.1
 qrcode==6.1
+reportlab==3.5.48
 six==1.15.0
 sqlparse==0.3.1
 xlrd==1.2.0

@@ -97,7 +97,11 @@
                 {% for operation in operations %}
                         {% if operation.manufactured.title == "Опытынй завод" %}
                             {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">ОТМЕТИТЬ</a>
+                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
+                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
+                            </a>
+                            {% else %}
+                            <a class="btn btn-success disabled"  href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
                             {% endif %}
                         {% endif %}
                 {% endfor %}
@@ -106,7 +110,11 @@
                 {% for operation in operations %}
                         {% if operation.manufactured.title == "НИИ Лазерная Резка" %}
                             {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">ОТМЕТИТЬ</a>
+                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
+                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
+                            </a>
+                            {% else %}
+                            <a class="btn btn-success disabled" href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
                             {% endif %}
                         {% endif %}
                 {% endfor %}
@@ -115,7 +123,11 @@
                 {% for operation in operations %}
                         {% if operation.manufactured.title == "Альянс Сталь" %}
                             {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">ОТМЕТИТЬ</a>
+                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
+                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
+                            </a>
+                            {% else %}
+                            <a class="btn btn-success disabled" href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
                             {% endif %}
                         {% endif %}
                 {% endfor %}
@@ -124,7 +136,11 @@
                 {% for operation in operations %}
                         {% if operation.manufactured.title == "CNC MetalWork" %}
                             {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">ОТМЕТИТЬ</a>
+                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
+                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
+                            </a>
+                            {% else %}
+                            <a class="btn btn-success disabled" href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
                             {% endif %}
                         {% endif %}
                 {% endfor %}
@@ -133,7 +149,11 @@
                 {% for operation in operations %}
                         {% if operation.manufactured.title == "Покрытие №1" %}
                             {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">ОТМЕТИТЬ</a>
+                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
+                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
+                            </a>
+                            {% else %}
+                            <a class="btn btn-success disabled" href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
                             {% endif %}
                         {% endif %}
                 {% endfor %}
@@ -142,7 +162,11 @@
                 {% for operation in operations %}
                         {% if operation.manufactured.title == "Покрытие №2" %}
                             {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">ОТМЕТИТЬ</a>
+                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
+                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
+                            </a>
+                            {% else %}
+                            <a class="btn btn-success disabled" href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
                             {% endif %}
                         {% endif %}
                 {% endfor %}
@@ -151,7 +175,11 @@
                 {% for operation in operations %}
                         {% if operation.manufactured.title == "Другой" %}
                             {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">ОТМЕТИТЬ</a>
+                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
+                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
+                            </a>
+                            {% else %}
+                            <a class="btn btn-success disabled" href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
                             {% endif %}
                         {% endif %}
                 {% endfor %}
