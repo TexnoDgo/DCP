@@ -38,6 +38,12 @@ class OrderSuperCreateForm(forms.ModelForm):
         fields = ['table']
 
 
+class OrderDRAWUploadForm(forms.Form):
+    archive = forms.FileField()
+    flag = forms.BooleanField(required=False, initial=False)
+    fields = ['archive', 'flag']
+
+
 class PositionCreateForm(forms.ModelForm):
     class Meta:
         model = Position

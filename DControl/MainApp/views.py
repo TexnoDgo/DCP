@@ -9,10 +9,10 @@ from .models import (Material, Assortment, Detail,
                      Project, Order, Position, City,
                      Manufactured, Operation, Transaction)
 from .forms import (ProjectCreateForm, MaterialCreateForm, AssortmentCreateForm,
-                    DetailCreateForm, OrderCreateForm, OrderSuperCreateForm, PositionCreateForm,
-                    CityCreateForm, ManufacturedCreateForm, OperationCreateForm,
+                    DetailCreateForm, OrderCreateForm, OrderSuperCreateForm, OrderDRAWUploadForm,
+                    PositionCreateForm, CityCreateForm, ManufacturedCreateForm, OperationCreateForm,
                     TransactionCreateForm)
-from .handlers import convert_pdf_to_bnp, qr_generator, create_pdf
+from .handlers import convert_pdf_to_bnp, qr_generator, create_pdf, detail_check, ex_archive
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -110,13 +110,6 @@ def order_super_create(request):
                 col_0 = 4
                 # Информация о детали
                 detail_title = sheet.cell(row=row_0 + i, column=1).value
-                print(detail_title)
-                try:
-                    prov = Detail.objects.filter(title=detail_title)
-                    print('yes')
-                except:
-                    print('no')
-
                 detail_material = sheet.cell(row=row_0 + i, column=3).value
                 detail_assortment = sheet.cell(row=row_0 + i, column=4).value
                 # Информация о позициях
@@ -124,20 +117,32 @@ def order_super_create(request):
 
                 if detail_title is not None:
                     i += 1
-
+                    print(detail_title)
+                    ex_part = detail_check(detail_title)
+                    print(ex_part)
                     # --------------------Создание детали-----------------------
                     ex_material = Material.objects.get(title=detail_material)
                     ex_assortment = Assortment.objects.get(title=detail_assortment)
-                    detail = Detail(title=detail_title, author=request.user, material=ex_material, assortment=ex_assortment)
-                    detail.save()
-                    # --------------------Создание детали-----------------------
-
-                    # --------------------Создание позиции-----------------------
                     code = get_random_string(length=32)
                     qr_code = qr_generator(code)
-                    position = Position(order=super_order, detail=detail, quantity=position_quantity, code=code, qr_code=qr_code)
+                    if not ex_part:
+                        # --------------------Создание детали-----------------------
+                        detail = Detail(title=detail_title, author=request.user, material=ex_material,
+                                        assortment=ex_assortment)
+                        detail.save()
+                        # --------------------Создание детали-----------------------
+                        # --------------------Создание позиции-----------------------
+                        position = Position(order=super_order, detail=detail, quantity=position_quantity,
+                                            code=code, qr_code=qr_code)
+                        # --------------------Создание позиции-----------------------
+                    elif ex_part:
+                        detail = Detail.objects.get(title=detail_title)
+                        position = Position(order=super_order, detail=detail, quantity=position_quantity,
+                                            code=code, qr_code=qr_code)
+                    else:
+                        print('IF error')
+
                     position.save()
-                    # --------------------Создание позиции-----------------------
 
                     # ----------------------Информация об операциях-----------------
                     for a in range(1, 8):
@@ -145,7 +150,8 @@ def order_super_create(request):
                         operation_manufactured = sheet.cell(row=7, column=col_0 + a).value
                         if operation is not None:
                             ex_manufactured = Manufactured.objects.get(title=operation_manufactured)
-                            ex_opertion = Operation(manufactured=ex_manufactured, position=position, remaining_parts=position_quantity)
+                            ex_opertion = Operation(manufactured=ex_manufactured, position=position,
+                                                    remaining_parts=position_quantity)
                             ex_opertion.save()
                     # ----------------------Информация об операциях-----------------
                 else:
@@ -181,11 +187,29 @@ def order_view(request, url):
     positions = Position.objects.filter(order=order)
     details = Detail.objects.all()
     operations = Operation.objects.all()
+
+    if request.method == 'POST':
+
+        form = OrderDRAWUploadForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            archive = form.cleaned_data.get('archive', None)
+            flag = form.cleaned_data.get('flag', None)
+            order.draw_archive = archive
+            order.save()
+            if flag:
+                print(ex_archive(order))
+            return redirect(request.META['HTTP_REFERER'])
+    else:
+
+        form = OrderDRAWUploadForm()
+
     context = {
         'order': order,
         'positions': positions,
         'details': details,
         'operations': operations,
+        'form': form,
     }
 
     return render(request, 'MainApp/Order.html', context)

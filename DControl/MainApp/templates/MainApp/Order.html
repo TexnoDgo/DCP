@@ -2,6 +2,7 @@
 {% block title %}DControl - Заказ № {{order.pk}}{% endblock %}
 {% block content %}
 {% load static %}
+{% load crispy_forms_tags %}
 <div class="container">
     <h1>DControl - Заказ № {{order.pk}}</h1>
     <table class="table table-sm table-dark">
@@ -26,6 +27,39 @@
     </table>
     <a href="{{order.qr_code_list.url}}" type="button" class="btn btn-outline-info">ОТКРЫТЬ QR-CODE PDF</a>
     <a href="{{order.qr_code_list.url}}" type="button" class="btn btn-outline-danger " download>СКАЧАТЬ QR-CODE PDF</a>
+
+    <button type="button" class="btn btn btn-outline-warning" data-toggle="modal" data-target="#exampleModalCenter">
+      ЗАГРУЗИТЬ ЧЕРТЕЖИ PDF
+    </button>
+    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+      <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalCenterTitle">Загрузка чертежей для заказа {{order.title}} #{{order.pk}}</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        <form method="POST" enctype="multipart/form-data">
+          <div class="modal-body">
+                {% csrf_token %}
+                <div>
+                    {{form.archive}}
+                </div>
+                <div>
+                    {{form.flag}}
+                    Присвоить чертежи деталям?(<small>Нет по умолчанию</small>)
+                </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+            <button type="submit" class="btn btn-primary">Загрузить</button>
+          </div>
+        </form>
+        </div>
+      </div>
+    </div>
+
     <table class="table mt-2" style="font-size: 0.7em;">
         <thead class="thead-dark">
             <tr align="center">

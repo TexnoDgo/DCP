@@ -1,10 +1,12 @@
 import qrcode
 import fitz
+import zipfile
 import os
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from .models import Position
+from .models import Position, Detail, Order
+from pathlib import Path
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -67,7 +69,7 @@ def create_pdf(order):
         i += 1
 
     a = 3
-    b = i//a
+    b = i // a
 
     k = 0
     t = 0
@@ -101,3 +103,49 @@ def create_pdf(order):
     pdf.save()
 
     return file_name
+
+
+def detail_check(title):
+    try:
+        detail = Detail.objects.get(title=title)
+        ex_check = True
+    except:
+        ex_check = False
+    return ex_check
+
+
+def ex_archive(order):  # Распковка архива и присвоение чертежей деталям.
+    ex_order = Order.objects.get(pk=order.pk)
+    zip_archive = zipfile.ZipFile(ex_order.draw_archive, 'r')
+    pdf_path = os.path.join(BASE_DIR, 'media/PDF_DRAW/')
+    none_detail = []
+    yes_detail = []
+    for title in zip_archive.namelist():
+        zip_archive.extract(title, pdf_path)
+        file_path = pdf_path + title
+        title = Path(title.encode('cp437').decode('cp866'))
+        draw_path = str(pdf_path) + str(title)
+        draw_path = draw_path.replace('\\', '/')
+        os.rename(file_path, draw_path)
+        title = str(title)[0:-4]
+        d_check = detail_check(title)
+        print(title)
+        print(d_check)
+        if d_check:
+            detail = Detail.objects.get(title=title)
+            yes_detail.append(title)
+            detail.draw_pdf = draw_path
+            png_file_name = title + '.png'
+            print(png_file_name)  # Delete
+            png_full_path = os.path.join(BASE_DIR, 'media/PNG_COVER/') + png_file_name
+            print(png_full_path)  # Delete
+            convert_pdf_to_bnp(detail.draw_pdf.path, png_full_path)
+            png_path_name = 'PNG_COVER/' + png_file_name
+            print(png_path_name)
+            detail.draw_png = png_path_name
+            detail.save()
+        else:
+            none_detail.append(title)
+            os.remove(draw_path)
+    return none_detail, yes_detail
+

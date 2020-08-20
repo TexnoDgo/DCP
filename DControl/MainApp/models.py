@@ -45,6 +45,7 @@ class Order(models.Model):
     readiness = models.DateField(verbose_name='ПРИБЛИЗИТЕЛЬНЫЙ СРОК ГОТОВНОСТИ')  #
     table = models.FileField(upload_to='TABLES', verbose_name='ТАБЛИЦА', null=True)
     qr_code_list = models.FileField(upload_to='QR_CODE_LIST', verbose_name='ФАЙЛ С КОДАМИ', null=True)
+    draw_archive = models.FileField(upload_to='DRAW_ARCHIVE', verbose_name='АРХИВ С PDF ЧЕРТЕЖАМИ', null=True)
 
 
 class Position(models.Model):
