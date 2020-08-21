@@ -2,26 +2,35 @@
 {% block title %}DControl - Вход{% endblock %}
 
 {% block content %}
-<div class="container">
-    <form method="post" action="{% url 'login' %}">
+
+
+<style>
+    form {
+        display: block;
+        margin-top: 0em;
+        top: 50px;
+    }
+    .form-signin {
+    width: 100%;
+    max-width: 330px;
+    padding: 15px;
+    margin: 0 auto;
+    }
+</style>
+<form class="form-signin" method="post" action="{% url 'login' %}">
     {% csrf_token %}
-    <table>
+    <div align="center">
+        <img class="mb-4" src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg" alt="" width="72" height="72" >
+    </div>
 
-    <tr>
-      <td>{{ form.username.label_tag }}</td>
-      <td>{{ form.username }}</td>
-    </tr>
-
-    <tr>
-      <td>{{ form.password.label_tag }}</td>
-      <td>{{ form.password }}</td>
-    </tr>
-    </table>
-
-    <input type="submit" value="login" />
-    <input type="hidden" name="next" value="{{ next }}" />
-    </form>
-</div>
+  <h1 class="h3 mb-3 font-weight-normal" align="center">ПОЖАЛУЙСТА ВОЙДИТЕ</h1>
+  <label class="sr-only " for="{{ form.username }}ЛОГИН</label>
+  <input type="login" class="form-control mt-2" id="{{ form.username }}
+  <label class="sr-only mt-2" for="{{ form.password }}ПАРОЛЬ</label>
+  <input type="password" class="form-control mt-2" placeholder="Password" id="{{ form.password }}
+  <button class="btn btn-lg btn-primary btn-block mt-2" type="submit">ВОЙТИ</button>
+  <p class="mt-5 mb-3 text-muted" align="center">©2020 DControl</p>
+</form>
 
 
 {% endblock %}

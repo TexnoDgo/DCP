@@ -4,8 +4,13 @@
 {% load static %}
 {% load crispy_forms_tags %}
 <div class="container">
-    <h1>DControl - Заказ № {{order.pk}}</h1>
-    <table class="table table-sm table-dark">
+    <section class="jumbotron text-center mt-3">
+        <div class="container">
+          <h1 class="jumbotron-heading">DControl - Заказ № {{order.pk}}</h1>
+          <p class="lead text-muted"></p>
+        </div>
+    </section>
+    <table class="table table-bordered">
         <thead>
             <tr>
                 <th>Название заказа</th>
@@ -25,6 +30,8 @@
             </tr>
         </thead>
     </table>
+
+    <div align="center">
     <a href="{{order.qr_code_list.url}}" type="button" class="btn btn-outline-info">ОТКРЫТЬ QR-CODE PDF</a>
     <a href="{{order.qr_code_list.url}}" type="button" class="btn btn-outline-danger " download>СКАЧАТЬ QR-CODE PDF</a>
 
@@ -60,7 +67,14 @@
       </div>
     </div>
 
-    <table class="table mt-2" style="font-size: 0.7em;">
+    {% if order.archive_ready %}
+        <a href="{{order.draw_archive.url}}" type="button" class="btn btn-outline-success">СКАЧАТЬ PDF АРХИВ ЧЕРТЕЖЕЙ</a>
+    {% else %}
+        <a href="{% url 'archive_pdf_former' url=order.pk %}" type="button" class="btn btn-outline-secondary">СФОРМИРОВАТЬ PDF АРХИВ ЧЕРТЕЖЕЙ</a>
+    {% endif %}
+    </div>
+
+    <table class="table mt-2" style="font-size: 0.8em;">
         <thead class="thead-dark">
             <tr align="center">
             <th scope="col">#</th>
@@ -84,7 +98,7 @@
 
             <tr align="center">
               <th scope="row" >{{position.detail.id}}</th>
-              <td class="col">
+              <td class="col" >
                   <a href="{% url 'position_view' code=position.code %}">{{position.detail.title}}</a>
               </td>
               <td class="col">{{position.quantity}}</td>
@@ -94,7 +108,7 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "Опытынй завод" %}
-                                +
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -103,7 +117,7 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "НИИ Лазерная Резка" %}
-                                +
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -112,7 +126,7 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "Альянс Сталь" %}
-                                +
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -121,7 +135,7 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "CNC MetalWork" %}
-                                +
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -130,7 +144,7 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "Покрытие №1" %}
-                                +
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -139,7 +153,7 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "Покрытие №2" %}
-                                +
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -148,7 +162,7 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "Другой" %}
-                                +
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                             {% endif %}
                         {% endif %}
                     {% endfor %}

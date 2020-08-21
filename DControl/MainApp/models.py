@@ -3,7 +3,6 @@ from django.utils import timezone
 from django.contrib.auth.models import User
 
 
-
 class Material(models.Model):
     title = models.CharField(max_length=100, verbose_name='МАТЕРИАЛ', default='DEFAULT')  # Материал
 
@@ -18,6 +17,13 @@ class Assortment(models.Model):
         return self.title
 
 
+class StockageCode(models.Model):
+    title = models.CharField(max_length=100, verbose_name='МЕСТО ХРАНЕНИЯ', default='DEFAULT')  # Сортамент
+
+    def __str__(self):
+        return self.title
+
+
 class Detail(models.Model):
     title = models.TextField(max_length=100, verbose_name='НАИМЕНОВАНИЕ ДЕТАЛИ')  # Наименование детали
     # Чертеж PDF
@@ -27,7 +33,8 @@ class Detail(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name='АВТОР ДЕТАЛИ')  # Автор детали
     create = models.DateTimeField(default=timezone.now, verbose_name='ДАТА СОЗДАНИЯ')
     material = models.ForeignKey(Material, on_delete=models.CASCADE, verbose_name='МАТЕРИАЛ')  # Материал
-    assortment = models.ForeignKey(Assortment, on_delete=models.CASCADE, verbose_name='СОРТАМЕНТ')   # Сортамент
+    assortment = models.ForeignKey(Assortment, on_delete=models.CASCADE, verbose_name='ПРОКАТ')   # Сортамент
+    thickness_diameter = models.PositiveIntegerField(default=1, verbose_name='ЗНАЧЕНИЕ ТОЛЩИНЫ ИЛИ ДИАМЕТРА ПРОКАТА')
 
 
 class Project(models.Model):
@@ -46,6 +53,7 @@ class Order(models.Model):
     table = models.FileField(upload_to='TABLES', verbose_name='ТАБЛИЦА', null=True)
     qr_code_list = models.FileField(upload_to='QR_CODE_LIST', verbose_name='ФАЙЛ С КОДАМИ', null=True)
     draw_archive = models.FileField(upload_to='DRAW_ARCHIVE', verbose_name='АРХИВ С PDF ЧЕРТЕЖАМИ', null=True)
+    archive_ready = models.BooleanField(verbose_name='ГОТОВНОСТЬ PDF АРХИВА', default=False)
 
 
 class Position(models.Model):
@@ -54,6 +62,7 @@ class Position(models.Model):
     quantity = models.PositiveIntegerField(default=1, verbose_name='Кол-во')  #
     code = models.CharField(max_length=32, db_index=True)
     qr_code = models.ImageField(upload_to='QR_CODE', verbose_name='КОД ДЕТАЛИ', default='QR_CODE/default.png')
+    stockage_code = models.ForeignKey(StockageCode, on_delete=models.CASCADE, verbose_name='МЕСТО ХРАНЕНИЯ')
 
 
 class City(models.Model):

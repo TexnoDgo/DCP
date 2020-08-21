@@ -5,11 +5,17 @@
 {% load crispy_forms_tags %}
 
 <div class="container">
-    <h1>DControl - Создание детали</h1>
+    <section class="jumbotron text-center mt-3">
+        <div class="container">
+          <h1 class="jumbotron-heading">DControl - Создание детали</h1>
+          <p class="lead text-muted"></p>
+        </div>
+    </section>
+
     <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
         {{form|crispy}}
-        <button class="btn-primary col" type="submit">СОЗДАТЬ</button>
+        <button class="btn btn-primary col" type="submit">СОЗДАТЬ</button>
     </form>
 </div>
 

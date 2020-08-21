@@ -4,19 +4,28 @@ from openpyxl import load_workbook
 from django.utils.crypto import get_random_string
 from django.contrib import messages
 from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
 
 from .models import (Material, Assortment, Detail,
                      Project, Order, Position, City,
-                     Manufactured, Operation, Transaction)
+                     Manufactured, Operation, Transaction, StockageCode)
 from .forms import (ProjectCreateForm, MaterialCreateForm, AssortmentCreateForm,
                     DetailCreateForm, OrderCreateForm, OrderSuperCreateForm, OrderDRAWUploadForm,
                     PositionCreateForm, CityCreateForm, ManufacturedCreateForm, OperationCreateForm,
                     TransactionCreateForm)
-from .handlers import convert_pdf_to_bnp, qr_generator, create_pdf, detail_check, ex_archive
+from .handlers import convert_pdf_to_bnp, qr_generator, create_pdf, detail_check, ex_archive, pdf_archive_form
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
+def index(request):
+    details = Detail.objects.all()
+    context = {
+        'details': details,
+    }
+    return render(request, 'MainApp/HomePage.html', context)
+
+@login_required
 def detail_create(request):
     if request.method == "POST":
 
@@ -51,7 +60,7 @@ def detail_create(request):
 
     return render(request, 'MainApp/Detail_Create.html', context)
 
-
+@login_required
 def details_all(request):
     all_detail = Detail.objects.all()
     context = {
@@ -59,7 +68,7 @@ def details_all(request):
     }
     return render(request, 'MainApp/All_Details.html', context)
 
-
+@login_required
 def order_create(request):
 
     if request.method == "POST":
@@ -80,7 +89,7 @@ def order_create(request):
 
     return render(request, 'MainApp/Order_Create.html', context)
 
-
+@login_required
 def order_super_create(request):
     if request.method == 'POST':
 
@@ -107,11 +116,12 @@ def order_super_create(request):
             i = 1
             while i != 0:
                 row_0 = 7
-                col_0 = 4
+                col_0 = 5
                 # Информация о детали
                 detail_title = sheet.cell(row=row_0 + i, column=1).value
                 detail_material = sheet.cell(row=row_0 + i, column=3).value
                 detail_assortment = sheet.cell(row=row_0 + i, column=4).value
+                detail_thickness_diameter = sheet.cell(row=row_0 + i, column=5).value
                 # Информация о позициях
                 position_quantity = sheet.cell(row=row_0 + i, column=2).value
 
@@ -123,22 +133,23 @@ def order_super_create(request):
                     # --------------------Создание детали-----------------------
                     ex_material = Material.objects.get(title=detail_material)
                     ex_assortment = Assortment.objects.get(title=detail_assortment)
+                    ex_stockage_code = StockageCode.objects.get(title='Без расположения')
                     code = get_random_string(length=32)
                     qr_code = qr_generator(code)
                     if not ex_part:
                         # --------------------Создание детали-----------------------
                         detail = Detail(title=detail_title, author=request.user, material=ex_material,
-                                        assortment=ex_assortment)
+                                        assortment=ex_assortment, thickness_diameter=detail_thickness_diameter)
                         detail.save()
                         # --------------------Создание детали-----------------------
                         # --------------------Создание позиции-----------------------
                         position = Position(order=super_order, detail=detail, quantity=position_quantity,
-                                            code=code, qr_code=qr_code)
+                                            code=code, qr_code=qr_code, stockage_code=ex_stockage_code)
                         # --------------------Создание позиции-----------------------
                     elif ex_part:
                         detail = Detail.objects.get(title=detail_title)
                         position = Position(order=super_order, detail=detail, quantity=position_quantity,
-                                            code=code, qr_code=qr_code)
+                                            code=code, qr_code=qr_code, stockage_code=ex_stockage_code)
                     else:
                         print('IF error')
 
@@ -170,7 +181,7 @@ def order_super_create(request):
 
     return render(request, 'MainApp/Order_Super_Create.html', context)
 
-
+@login_required
 def orders_all(request):
 
     all_orders = Order.objects.all()
@@ -181,7 +192,7 @@ def orders_all(request):
 
     return render(request, 'MainApp/All_Orders.html', context)
 
-
+@login_required
 def order_view(request, url):
     order = Order.objects.get(pk=url)
     positions = Position.objects.filter(order=order)
@@ -278,4 +289,10 @@ def operation_view(request, url):
 def crete_order_qr_code_list(request, url):
     order = Order.objects.get(pk=url)
     create_pdf(order)
+    return redirect(request.META['HTTP_REFERER'])
+
+
+def archive_pdf_former(request, url):
+    pdf_archive_form(url)
+    # ADD MESSAGE
     return redirect(request.META['HTTP_REFERER'])

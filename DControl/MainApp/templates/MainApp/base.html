@@ -4,7 +4,9 @@
 <html lang="en" style="height:100%; margin:0;">
 <head>
     <meta charset="UTF-8">
+
     <title>{% block title %}{% endblock %}</title>
+
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
           integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
           crossorigin="anonymous">
@@ -15,28 +17,88 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
             integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
             crossorigin="anonymous"></script>
+
 </head>
+
 <header>
-
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <a class="navbar-brand" href="{% url 'HomePage' %}">DControl</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+              aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  ЗАКАЗЫ
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                  <a class="dropdown-item" href="{% url 'orders_all' %}">ВСЕ ЗАКАЗЫ</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="{% url 'order_super_create' %}">ЗАГРУЗИТЬ ТАБЛИЦУ</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="{% url 'order_create' %}">СОЗДАТЬ ЗАКАЗ</a>
+                </div>
+              </li>
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown2" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  ДЕТАЛИ
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown2">
+                  <a class="dropdown-item" href="{% url 'details_all' %}">ВСЕ ДЕТАЛИ</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="{% url 'detail_create' %}">СОЗДАТЬ ДЕТАЛЬ</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item disabled" href="#">ЗАГРУЗИТЬ ДЕТАЛЬ</a>
+                </div>
+              </li>
+                <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle disabled" href="#" id="navbarDropdown3" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                  ПРОЕКТЫ
+                </a>
+                <div class="dropdown-menu" aria-labelledby="navbarDropdown3">
+                  <a class="dropdown-item" href="#">Action</a>
+                  <a class="dropdown-item" href="#">Another action</a>
+                  <div class="dropdown-divider"></div>
+                  <a class="dropdown-item" href="#">Something else here</a>
+                </div>
+              </li>
+                <li class="nav-item">
+                <a class="nav-link disabled" href="#">ИНСТРУКЦИЯ ПОЛЬЗОВАНИЯ</a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
+              </li>
+            </ul>
+            <form class="form-inline my-2 my-lg-0">
+              <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">ПОИСК ДЕТАЛИ</a>
+              <input class="form-control mr-sm-4" type="search" placeholder="Ведите название" aria-label="Search">
+              <button class="btn btn-outline-light my-2 my-sm-0" type="submit">ПОИСК</button>
+            </form>
+            <div class="btn-group mr-4 ml-4" role="group">
+                {% if user.is_authenticated %}
+                <button id="btnGroupDrop1" type="button" class="btn btn btn-outline-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {{ user.get_username }}
+                </button>
+                <div class="dropdown-menu" aria-labelledby="btnGroupDrop1">
+                    <a class="dropdown-item disabled " href="#">ПРОФИЛЬ</a>
+                    <div class="dropdown-divider"></div>
+                    <a class="dropdown-item" href="{% url 'logout'%}">ВЫХОД</a>
+                </div>
+                {% else %}
+                    <a href="{% url 'login'%}" class="btn btn btn-outline-danger">
+                        ВОЙТИ
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
 </header>
-<body style="">
-    <div class="container">
-        <a href="{% url 'details_all' %}">Все детали</a>
-        <a href="{% url 'detail_create' %}">Создать деталь</a>
-        <a href="{% url 'orders_all' %}">Все заказы</a>
-        <a href="{% url 'order_create' %}">Создать заказ</a>
-        <a href="{% url 'order_super_create' %}">Создать супер заказ</a>
 
-        {% if user.is_authenticated %}
-          <li>User: {{ user.get_username }}</li>
-          <li><a href="{% url 'logout'%}?next={{request.path}}">Выход</a></li>
-        {% else %}
-          <li><a href="{% url 'login'%}?next={{request.path}}">Вход</a></li>
-        {% endif %}
-    </div>
+<body>
     {% block content %}
 
     {% endblock %}
-
 </body>
 </html>

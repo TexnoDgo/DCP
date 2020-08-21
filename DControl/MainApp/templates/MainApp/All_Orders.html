@@ -3,16 +3,21 @@
 {% block content %}
 {% load static %}
 <div class="container">
-  <h1>DControl - Все заказы</h1>
+  <section class="jumbotron text-center mt-3">
+    <div class="container">
+      <h1 class="jumbotron-heading">DControl - Все заказы</h1>
+      <p class="lead text-muted"></p>
+    </div>
+  </section>
   <table class="table">
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
         <th scope="col">НАИМЕНОВНИЕ</th>
-        <th scope="col">СОЗДАНА</th>
         <th scope="col">АВТОР</th>
+        <th scope="col">СОЗДАН</th>
         <th scope="col">ПРОЕКТ</th>
-        <th scope="col">ПРИБЛИЗИТЕЛЬНЫЙ СРОК ГОТОВНОСТИ</th>
+        <th scope="col">ДАТА ГОТОВНОСТИ</th>
       </tr>
     </thead>
     <tbody>

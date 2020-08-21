@@ -23,7 +23,7 @@ class AssortmentCreateForm(forms.ModelForm):
 class DetailCreateForm(forms.ModelForm):
     class Meta:
         model = Detail
-        fields = ['title', 'draw_pdf', 'material', 'assortment']
+        fields = ['title', 'draw_pdf', 'material', 'assortment', 'thickness_diameter']
 
 
 class OrderCreateForm(forms.ModelForm):

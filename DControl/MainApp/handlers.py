@@ -1,6 +1,7 @@
 import qrcode
 import fitz
 import zipfile
+import datetime
 import os
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
@@ -114,38 +115,80 @@ def detail_check(title):
     return ex_check
 
 
+def pdf_draw_check(title):
+    try:
+        detail = Detail.objects.get(title=title)
+        detail_draw = detail.draw_pdf
+        print(detail_draw)
+        ex_check = True
+    except:
+        ex_check = False
+        print(ex_check)
+    return ex_check
+
+
 def ex_archive(order):  # Распковка архива и присвоение чертежей деталям.
     ex_order = Order.objects.get(pk=order.pk)
+    ex_order.archive_ready = False
+    ex_order.save()
     zip_archive = zipfile.ZipFile(ex_order.draw_archive, 'r')
     pdf_path = os.path.join(BASE_DIR, 'media/PDF_DRAW/')
     none_detail = []
     yes_detail = []
+    sushest_detail = []
     for title in zip_archive.namelist():
-        zip_archive.extract(title, pdf_path)
+        try:
+            zip_archive.extract(title, pdf_path)
+        except:
+            sushest_detail.append(title)
         file_path = pdf_path + title
         title = Path(title.encode('cp437').decode('cp866'))
         draw_path = str(pdf_path) + str(title)
         draw_path = draw_path.replace('\\', '/')
         os.rename(file_path, draw_path)
         title = str(title)[0:-4]
+        pdf_draw_check(title)
         d_check = detail_check(title)
-        print(title)
-        print(d_check)
         if d_check:
             detail = Detail.objects.get(title=title)
             yes_detail.append(title)
             detail.draw_pdf = draw_path
             png_file_name = title + '.png'
-            print(png_file_name)  # Delete
             png_full_path = os.path.join(BASE_DIR, 'media/PNG_COVER/') + png_file_name
-            print(png_full_path)  # Delete
             convert_pdf_to_bnp(detail.draw_pdf.path, png_full_path)
             png_path_name = 'PNG_COVER/' + png_file_name
-            print(png_path_name)
             detail.draw_png = png_path_name
             detail.save()
         else:
             none_detail.append(title)
             os.remove(draw_path)
-    return none_detail, yes_detail
+    return none_detail, yes_detail, sushest_detail
 
+
+def pdf_archive_form(url):
+    order = Order.objects.get(pk=url)
+    positions = Position.objects.filter(order=order)
+    old_archive_path = order.draw_archive.path  # Удалить послез перезаписи нового
+    archive_name = str(order.title) + " " \
+                   + (str(datetime.datetime.now())).replace('-', '').replace(':', ''). \
+                       replace('.', '').replace(' ', '') + '.zip'
+    new_archive_path = os.path.join(BASE_DIR, 'media/DRAW_ARCHIVE/') + archive_name
+    archive = zipfile.ZipFile(new_archive_path, mode='w')
+    for position in positions:
+        try:
+            print('create')
+            if position.detail.draw_pdf == 'PDF_DRAW/default.pdf':
+                print('continue')
+                continue
+            else:
+                archive.write(position.detail.draw_pdf.path)
+                print('wright')
+        finally:
+            print('close')
+    archive.close()
+    order.draw_archive = new_archive_path
+    order.archive_ready = True
+    order.save()
+    os.remove(old_archive_path)
+
+    return True

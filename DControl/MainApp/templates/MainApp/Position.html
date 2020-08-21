@@ -2,193 +2,48 @@
 {% block title %}DControl - Позиция № {{position.pk}}{% endblock %}
 {% block content %}
 {% load static %}
-<div class="container">
-    <h1>DControl - Позиция № {{position.pk}}</h1>
-    <table class="table table-sm table-dark">
-        <thead>
-            <tr>
-                <th>Название заказа</th>
-                <th>{{order.title}}</th>
-            </tr>
-            <tr>
-                <th>Автор заказа</th>
-                <th>{{order.author}}</th>
-            </tr>
-            <tr>
-                <th scope="col">Проект</th>
-                <th scope="col">{{order.project.title}}</th>
-            </tr>
-            <tr>
-                <th scope="col">Дата готовности</th>
-                <th scope="col">{{order.readiness}}</th>
-            </tr>
-        </thead>
-    </table>
-    <table class="table" >
-        <thead class="thead-dark" style="font-size: 0.7em;">
-            <tr align="center">
-            <th scope="col">#</th>
-            <th scope="col">НАИМЕНОВНИЕ ДЕТАЛИ</th>
-            <th scope="col">КОЛИЧЕСТВО</th>
-            <th scope="col">МАТЕРИАЛ</th>
-            <th scope="col">СОРТАМЕНТ</th>
-            <th scope="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "Опытынй завод" %}
-                            Опытынй завод
-                        {% endif %}
-                {% endfor %}
-            </th>
-            <th scope="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "НИИ Лазерная Резка" %}
-                            НИИ Лазерная Резка
-                        {% endif %}
-                {% endfor %}
+<div class="container mb-5">
+    <section class="jumbotron text-center mt-3">
+        <div class="container">
+          <h1 class="jumbotron-heading">DControl - Позиция № {{position.pk}}</h1>
+          <p class="lead text-muted"></p>
+        </div>
+    </section>
+    <div class="card mb-3">
+      <img src="{{position.detail.draw_png.url}}" class="card-img-top" alt="...">
+      <div class="card-body" align="center">
+          <ul class="list-group list-group-horizontal">
+            <li class="list-group-item col">
+                <h5 class="card-title">{{detail.title}} - {{position.quantity}} штуки.</h5>
+                <p class="card-text">Заготовка - {{detail.material}} {{detail.assortment}} {{detail.thickness_diameter}} мм.</p>
+                <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
+            </li>
+                <li class="list-group-item col">
+                    <img src="{{position.qr_code.url}}" width="200">
+                </li>
+            </ul>
 
-            </th>
-            <th scope="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "Альянс Сталь" %}
-                            Альянс Сталь
-                        {% endif %}
-                {% endfor %}
-            </th>
-            <th scope="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "CNC MetalWork" %}
-                            CNC MetalWork
-                        {% endif %}
-                {% endfor %}
-            </th>
-            <th scope="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "Покрытие №1" %}
-                            Покрытие №1
-                        {% endif %}
-                {% endfor %}
-            </th>
-            <th scope="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "Покрытие №2" %}
-                            Покрытие №2
-                        {% endif %}
-                {% endfor %}
-            </th>
-            <th scope="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "Другой" %}
-                            Другой
-                        {% endif %}
-                {% endfor %}
-
-            </th>
-            <th scope="col">QR-CODE</th>
-          </tr>
-        </thead>
-        <tbody>
-        <tr align="center">
-            <th scope="row" >{{detail.id}}</th>
-            <td class="col">{{detail.title}}</td>
-            <td class="col">{{position.quantity}}</td>
-            <td class="col">{{detail.material}}</td>
-            <td class="col">{{detail.assortment}}</td>
-            <td class="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "Опытынй завод" %}
-                            {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
-                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
-                            </a>
-                            {% else %}
-                            <a class="btn btn-success disabled"  href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
-                            {% endif %}
-                        {% endif %}
-                {% endfor %}
-            </td>
-            <td class="col" >
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "НИИ Лазерная Резка" %}
-                            {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
-                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
-                            </a>
-                            {% else %}
-                            <a class="btn btn-success disabled" href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
-                            {% endif %}
-                        {% endif %}
-                {% endfor %}
-            </td>
-            <td class="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "Альянс Сталь" %}
-                            {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
-                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
-                            </a>
-                            {% else %}
-                            <a class="btn btn-success disabled" href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
-                            {% endif %}
-                        {% endif %}
-                {% endfor %}
-            </td>
-            <td class="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "CNC MetalWork" %}
-                            {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
-                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
-                            </a>
-                            {% else %}
-                            <a class="btn btn-success disabled" href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
-                            {% endif %}
-                        {% endif %}
-                {% endfor %}
-            </td>
-            <td class="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "Покрытие №1" %}
-                            {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
-                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
-                            </a>
-                            {% else %}
-                            <a class="btn btn-success disabled" href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
-                            {% endif %}
-                        {% endif %}
-                {% endfor %}
-            </td>
-            <td class="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "Покрытие №2" %}
-                            {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
-                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
-                            </a>
-                            {% else %}
-                            <a class="btn btn-success disabled" href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
-                            {% endif %}
-                        {% endif %}
-                {% endfor %}
-            </td>
-            <td class="col">
-                {% for operation in operations %}
-                        {% if operation.manufactured.title == "Другой" %}
-                            {% if operation.status != "RD" %}
-                            <a class="btn btn-success" href="{% url 'operation_view' url=operation.pk %}">
-                                ВЫБРАТЬ<span class="badge badge-light">{{operation.remaining_parts}}</span>
-                            </a>
-                            {% else %}
-                            <a class="btn btn-success disabled" href="{% url 'operation_view' url=operation.pk %}" >ВЫБРАТЬ</a>
-                            {% endif %}
-                        {% endif %}
-                {% endfor %}
-            </td>
-            <td class="col">
-                <img src="{{position.qr_code.url}}" width="200">
-            </td>
-        </tr>
-    </tbody>
-    </table>
+      </div>
+    </div>
+    <ul class="list-group list-group-horizontal ">
+      <li class="list-group-item col">Название заказа</li>
+      <li class="list-group-item list-group-item-info col">{{order.title}}</li>
+      <li class="list-group-item col">Автор заказа</li>
+      <li class="list-group-item list-group-item-info col ">{{order.author}}</li>
+    </ul>
+    <ul class="list-group list-group-horizontal mt-1">
+      <li class="list-group-item col">Проект</li>
+      <li class="list-group-item list-group-item-info col">{{order.project.title}}</li>
+      <li class="list-group-item col">Дата готовности</li>
+      <li class="list-group-item list-group-item-info col">{{order.readiness}}</li>
+    </ul>
+    <ul class="list-group list-group-horizontal mt-4">
+        {% for operation in operations %}
+        <a href="#" class="list-group-item list-group-item-action list-group-item-primary d-flex justify-content-between align-items-center col">
+            {{operation.manufactured.title}}
+           <span class="badge badge-dark">{{operation.remaining_parts}}</span>
+        </a>
+        {% endfor %}
+    </ul>
 </div>
 {% endblock %}
