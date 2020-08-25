@@ -6,14 +6,18 @@ import os
 from reportlab.pdfgen import canvas
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-from .models import Position, Detail, Order
 from pathlib import Path
+from django.conf import settings
+from .models import Position, Detail, Order
+
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def qr_generator(title):
-    detail_view_url = 'http://18.184.13.41/all/Position/' + title
+    # host = settings.ALLOWED_HOSTS[0]
+    # detail_view_url = 'http://' + str(host) + '/all/Position/' + title
+    detail_view_url = 'http://127.0.0.1:8000/all/Position/' + title
     text = str(title)
     img = qrcode.make(detail_view_url)
     img_path = os.path.join(BASE_DIR, 'media/QR_CODE/') + text + '.png'
@@ -35,10 +39,10 @@ def convert_pdf_to_bnp(infile, outfile):
 def create_pdf(order):
     positions = Position.objects.filter(order=order)
     f_n = (str(order.title) + " #" + str(order.pk))
-    file_name = 'C:/PP/DCProject/DCP/DControl/media/QR_CODE_LIST/{}.pdf'.format(f_n)
+    file_name = os.path.join(BASE_DIR, 'media/QR_CODE_LIST/') + '{}.pdf'.format(f_n)
     documentTitle = '{} #{}'.format(order.title, order.pk)
     pdf = canvas.Canvas(file_name)
-    pdfmetrics.registerFont(TTFont('FreeSans', 'C:/PP/DCProject/DCP/DControl/MainApp/FreeSans.ttf'))
+    pdfmetrics.registerFont(TTFont('FreeSans', os.path.join(BASE_DIR, 'MainApp/FreeSans.ttf')))
     canvas.Canvas.setFont(pdf, 'FreeSans', 8)
     pdf.setTitle(documentTitle)
     masshtab = 2.834
@@ -88,7 +92,7 @@ def create_pdf(order):
             g = 0
             t = 0
             canvas.Canvas.showPage(pdf)
-            pdfmetrics.registerFont(TTFont('FreeSans', 'C:/PP/DCProject/DCP/DControl/MainApp/FreeSans.ttf'))
+            pdfmetrics.registerFont(TTFont('FreeSans', os.path.join(BASE_DIR, 'MainApp/FreeSans.ttf')))
             canvas.Canvas.setFont(pdf, 'FreeSans', 8)
         if k > 2:
             k = 0
@@ -138,7 +142,7 @@ def ex_archive(order):  # Распковка архива и присвоени�
     sushest_detail = []
     for title in zip_archive.namelist():
         print(title)
-        if os.path.exists(pdf_path):
+        if os.path.exists(pdf_path + title):
             title = title.encode('cp437').decode('cp866')
             print('yes')
             sushest_detail.append(title)

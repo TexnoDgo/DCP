@@ -59,11 +59,9 @@
 
                                 <div class="form-group">
                                     <select class="form-control" id="{{form.position_in}}
-                                        <option>Бокс 1 - Стеллаж 1 - Полка 1</option>
-                                        <option>Бокс 2 - Стеллаж 1 - Полка 1</option>
-                                        <option>Бокс 3 - Стеллаж 1 - Полка 1</option>
-                                        <option>Бокс 3 - Стеллаж 2 - Полка 1</option>
-
+                                        {% for stock in stockage %}
+                                            <option>{{stock.title}}</option>
+                                        {% endfor %}
                                     </select>
                                 </div>
                                 </div>

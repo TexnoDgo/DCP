@@ -7,6 +7,7 @@ from django.contrib import messages
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
+
 from .models import (Material, Assortment, Detail,
                      Project, Order, Position, City,
                      Manufactured, Operation, Transaction, StockageCode, SystemFile)
@@ -222,6 +223,7 @@ def order_super_create(request):
 def orders_all(request):
 
     all_orders = Order.objects.all()
+
     '''orders = {}
     for order in all_orders:
         orders = order.title
@@ -258,7 +260,6 @@ def order_view(request, url):
         ready_operations = 0
         for operation in order_operations:
             ready_operations += int(operation.remaining_parts)
-            print(ready_operations)
         ready_positions[position.detail.title] = ready_operations
 
     print(ready_positions)
@@ -297,6 +298,7 @@ def position_view(request, code):
     order = Order.objects.get(pk=position.order.pk)
     detail = Detail.objects.get(pk=position.detail.pk)
     maps = SystemFile.objects.get(title='maps')
+    stockage = StockageCode.objects.all()
 
     if request.method == 'POST':
 
@@ -325,6 +327,7 @@ def position_view(request, code):
         'detail': detail,
         'form': form,
         'maps': maps,
+        'stockage': stockage,
     }
 
     return render(request, 'MainApp/Position.html', context)
