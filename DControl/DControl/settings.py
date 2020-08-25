@@ -12,10 +12,10 @@ https://docs.djangoproject.com/en/3.1/ref/settings/
 
 from pathlib import Path
 import os
-
+import urllib.request
+#key = urllib.request.urlopen('https://django-key.s3.eu-central-1.amazonaws.com/key.txt?response-content-disposition=inline&X-Amz-Security-Token=IQoJb3JpZ2luX2VjENX%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEaDGV1LWNlbnRyYWwtMSJIMEYCIQC6oEBtdVA1Bk5Ldy3LopGJL3%2F3xqtOn1yIY2NO9kv0CgIhAJdMsDokBKMy%2B0%2B%2BjldfuHJDV899QuR9dJm%2BcytUStkOKtECCL7%2F%2F%2F%2F%2F%2F%2F%2F%2F%2FwEQARoMOTk2ODAxODcxOTYxIgzfTJ28XGjRDq2n2y4qpQIj0zMc5qeprNW8Bysb97UFhNhk8DygIZa1QxgjLmeoE%2FZEfb9zd6hufnU5AbO8sxNcC3kTPP9JvaobkOTx5UE4R5ELQWL9O%2FQCrrwp9KnzehSZPKmL9AU0cKWHYkfkO85wwu7LkU4w8ixDRQczHaxQkozDGT7UPr3te5CUucOyn3QTLtGBB26LavkxQxlIwayVaVp7%2BmiZRnaqfVTBQV3%2F7alM5mY%2Fte40NsrkS%2BDmVfGMUVVy5h7%2Fj8EeKK4zlcHEPTOjHS2oCQGfJI189bIs7eANafbGD%2BlkVyqD%2FzFKoqQM38QcjzyDX3W83%2BeHSZ0P11MAWrWl0UKF00%2BSrnZGKrjrheygN%2FY2d5g5d8IqvmovM0QVoMkSuHyHaqt95GZkmyq%2F%2BzCfnZT6BTqvAiwgKCPpjxG6L2vmkrOgzA3R7x5BYWGKiqNQbsV20LhFu%2Bjfx46qMJO4D4tqIJiPFYZQvN88%2FRkZlAoPBsnHz0OTHj0wTiRSylbHJjQiDibCkSmxLMJGtNPelfJGzQQiOtlsF%2F6SoV3U6V%2FL1BqoWtvhA%2FdNtqIbYQMFOr%2BvaAQcdAhtvQWNiUpvDUAltjcurNWW413vmc3cA6rRfgObwI3CUU13%2BHhrMFjO22n8rhOarWSU6dGTD2i3LqgmBf9EbOpbw4%2BofI2vs25%2FVSIBQEoDflKMffiAi%2FkgSAh0Ttb9KyrEQOLqqmBa%2F%2F1B6IMRpTdhGr72HT%2F3pdKwC8U2fl6m%2BJ%2FoJceh3Qd3gMgedpTW2wzgU4zrJa4PTnc1gTigo3QJKOis1MKFXRAzArDDKw%3D%3D&X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Date=20200825T131653Z&X-Amz-SignedHeaders=host&X-Amz-Expires=300&X-Amz-Credential=ASIA6QFQFQBMQRBRQYDG%2F20200825%2Feu-central-1%2Fs3%2Faws4_request&X-Amz-Signature=d7d430b37e5cf16ee282ecaced016c8206c18fe6b3a205bde7a33598d14b4f3c')
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve(strict=True).parent.parent
-
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.1/howto/deployment/checklist/

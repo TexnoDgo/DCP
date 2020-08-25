@@ -4,6 +4,13 @@
 {% load static %}
 {% load crispy_forms_tags %}
 <div class="container">
+    {% if messages %}
+    <ul class="messages mt-3">
+        {% for message in messages %}
+            <li class="list-group-item list-group-item-danger">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
     <section class="jumbotron  mt-3">
         <div class="container">
             <div class="text-center">
@@ -88,89 +95,97 @@
           </tr>
         </thead>
         <tbody>
+          {% for position in positions %}
+              {% if position %}
+                    {% for key1,item1 in ready_positions.items %}
+                        {% if key1 == position.detail.title %}
+                            {% if item1 == 0 %}
+                            {{item1}}
+                                <tr class="table-success" align="center">
+                            {% else %}
+                                <tr align="center">
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
 
-      {% for position in positions %}
-          {% if position %}
-
-            <tr align="center">
-                <th scope="row" >{{position.detail.id}}</th>
-                <td class="col" >
-                  <a href="{% url 'position_view' code=position.code %}">{{position.detail.title}}</a>
-                </td>
-                <td class="col">{{position.quantity}}</td>
-                <td class="col">{{position.detail.material}}</td>
-                <td class="col">{{position.detail.assortment}}</td>
-                <td class="col">{{position.detail.thickness_diameter}}</td>
-                <td class="col">
-                {% for operation in operations %}
-                    {% if operation.position == position %}
-                        {% if operation.manufactured.title == "Опытынй завод" %}
-                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                    <th scope="row" >{{position.detail.id}}</th>
+                    <td class="col" >
+                      <a href="{% url 'position_view' code=position.code %}">{{position.detail.title}}</a>
+                    </td>
+                    <td class="col">{{position.quantity}}</td>
+                    <td class="col">{{position.detail.material}}</td>
+                    <td class="col">{{position.detail.assortment}}</td>
+                    <td class="col">{{position.detail.thickness_diameter}}</td>
+                    <td class="col">
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "Опытынй завод" %}
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
-                </td>
-                <td class="col" >
-                {% for operation in operations %}
-                    {% if operation.position == position %}
-                        {% if operation.manufactured.title == "НИИ Лазерная Резка" %}
-                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                    {% endfor %}
+                    </td>
+                    <td class="col" >
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "НИИ Лазерная Резка" %}
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
-                </td>
-                <td class="col">
-                {% for operation in operations %}
-                    {% if operation.position == position %}
-                        {% if operation.manufactured.title == "Альянс Сталь" %}
-                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                    {% endfor %}
+                    </td>
+                    <td class="col">
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "Альянс Сталь" %}
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
-                </td>
-                <td class="col">
-                {% for operation in operations %}
-                    {% if operation.position == position %}
-                        {% if operation.manufactured.title == "CNC MetalWork" %}
-                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                    {% endfor %}
+                    </td>
+                    <td class="col">
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "CNC MetalWork" %}
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
-                </td>
-                <td class="col">
-                {% for operation in operations %}
-                    {% if operation.position == position %}
-                        {% if operation.manufactured.title == "Покрытие №1" %}
-                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                    {% endfor %}
+                    </td>
+                    <td class="col">
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "Покрытие №1" %}
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
-                </td>
-                <td class="col">
-                {% for operation in operations %}
-                    {% if operation.position == position %}
-                        {% if operation.manufactured.title == "Покрытие №2" %}
-                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                    {% endfor %}
+                    </td>
+                    <td class="col">
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "Покрытие №2" %}
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
-                </td>
-                <td class="col">
-                {% for operation in operations %}
-                    {% if operation.position == position %}
-                        {% if operation.manufactured.title == "Другой" %}
-                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                    {% endfor %}
+                    </td>
+                    <td class="col">
+                    {% for operation in operations %}
+                        {% if operation.position == position %}
+                            {% if operation.manufactured.title == "Другой" %}
+                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                            {% endif %}
                         {% endif %}
-                    {% endif %}
-                {% endfor %}
-                </td>
-                <td class="col">
-                    {{position.stockage_code}}
-                </td>
-            </tr>
-          {% endif %}
-      {% endfor %}
-    </tbody>
+                    {% endfor %}
+                    </td>
+                    <td class="col">
+                        {{position.stockage_code}}
+                    </td>
+                </tr>
+              {% endif %}
+          {% endfor %}
+        </tbody>
     </table>
 </div>
 {% endblock %}

@@ -50,6 +50,16 @@ class PositionCreateForm(forms.ModelForm):
         fields = ['order', 'detail', 'quantity']
 
 
+class PositionStorageForm(forms.Form):
+    position_in = forms.CharField(max_length=40)
+    fields = ['position_in']
+
+
+class PositionSearch(forms.Form):
+    my_request = forms.CharField(max_length=30)
+    fields = ['my_request']
+
+
 class CityCreateForm(forms.ModelForm):
     class Meta:
         model = City

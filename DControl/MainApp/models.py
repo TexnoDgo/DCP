@@ -105,3 +105,8 @@ class Transaction(models.Model):
     create = models.DateTimeField(default=timezone.now, verbose_name='ДАТА СОЗДАНИЯ')  #
     operation = models.ForeignKey(Operation, on_delete=models.CASCADE, verbose_name='ОПЕРАЦИЯ')
     ready_quantity = models.PositiveIntegerField(default=1, verbose_name='КОЛ-ВО ГОТОВЫХ ДЕТАЛЕЙ')  #
+
+
+class SystemFile(models.Model):
+    title = models.CharField(max_length=40)
+    file = models.ImageField(upload_to='SYSTEM_FILES')

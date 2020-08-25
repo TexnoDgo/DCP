@@ -38,7 +38,7 @@
                   <div class="dropdown-divider"></div>
                   <a class="dropdown-item" href="{% url 'order_super_create' %}">ЗАГРУЗИТЬ ТАБЛИЦУ</a>
                   <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="{% url 'order_create' %}">СОЗДАТЬ ЗАКАЗ</a>
+                  <a class="dropdown-item disabled" href="{% url 'order_create' %}">СОЗДАТЬ ЗАКАЗ</a>
                 </div>
               </li>
                 <li class="nav-item dropdown">
@@ -48,7 +48,7 @@
                 <div class="dropdown-menu" aria-labelledby="navbarDropdown2">
                   <a class="dropdown-item" href="{% url 'details_all' %}">ВСЕ ДЕТАЛИ</a>
                   <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="{% url 'detail_create' %}">СОЗДАТЬ ДЕТАЛЬ</a>
+                  <a class="dropdown-item disabled" href="{% url 'detail_create' %}">СОЗДАТЬ ДЕТАЛЬ</a>
                   <div class="dropdown-divider"></div>
                   <a class="dropdown-item disabled" href="#">ЗАГРУЗИТЬ ДЕТАЛЬ</a>
                 </div>
@@ -71,11 +71,7 @@
                 <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
               </li>
             </ul>
-            <form class="form-inline my-2 my-lg-0">
-              <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">ПОИСК ДЕТАЛИ</a>
-              <input class="form-control mr-sm-4" type="search" placeholder="Ведите название" aria-label="Search">
-              <button class="btn btn-outline-light my-2 my-sm-0" type="submit">ПОИСК</button>
-            </form>
+
             <div class="btn-group mr-4 ml-4" role="group">
                 {% if user.is_authenticated %}
                 <button id="btnGroupDrop1" type="button" class="btn btn btn-outline-danger dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">

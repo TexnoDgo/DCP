@@ -13,7 +13,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def qr_generator(title):
-    detail_view_url = 'http://127.0.0.1:8000/all/Position/' + title
+    detail_view_url = 'http://18.184.13.41/all/Position/' + title
     text = str(title)
     img = qrcode.make(detail_view_url)
     img_path = os.path.join(BASE_DIR, 'media/QR_CODE/') + text + '.png'
@@ -137,31 +137,36 @@ def ex_archive(order):  # Распковка архива и присвоени�
     yes_detail = []
     sushest_detail = []
     for title in zip_archive.namelist():
-        try:
-            zip_archive.extract(title, pdf_path)
-        except:
+        print(title)
+        if os.path.exists(pdf_path):
+            title = title.encode('cp437').decode('cp866')
+            print('yes')
             sushest_detail.append(title)
-        file_path = pdf_path + title
-        title = Path(title.encode('cp437').decode('cp866'))
-        draw_path = str(pdf_path) + str(title)
-        draw_path = draw_path.replace('\\', '/')
-        os.rename(file_path, draw_path)
-        title = str(title)[0:-4]
-        pdf_draw_check(title)
-        d_check = detail_check(title)
-        if d_check:
-            detail = Detail.objects.get(title=title)
-            yes_detail.append(title)
-            detail.draw_pdf = draw_path
-            png_file_name = title + '.png'
-            png_full_path = os.path.join(BASE_DIR, 'media/PNG_COVER/') + png_file_name
-            convert_pdf_to_bnp(detail.draw_pdf.path, png_full_path)
-            png_path_name = 'PNG_COVER/' + png_file_name
-            detail.draw_png = png_path_name
-            detail.save()
         else:
-            none_detail.append(title)
-            os.remove(draw_path)
+            print('no')
+            zip_archive.extract(title, pdf_path)
+            file_path = pdf_path + title
+            title = Path(title.encode('cp437').decode('cp866'))
+            draw_path = str(pdf_path) + str(title)
+            draw_path = draw_path.replace('\\', '/')
+            os.rename(file_path, draw_path)
+            title = str(title)[0:-4]
+            pdf_draw_check(title)
+            d_check = detail_check(title)
+            if d_check:
+                detail = Detail.objects.get(title=title)
+                yes_detail.append(title)
+                detail.draw_pdf = draw_path
+                png_file_name = title + '.png'
+                png_full_path = os.path.join(BASE_DIR, 'media/PNG_COVER/') + png_file_name
+                convert_pdf_to_bnp(detail.draw_pdf.path, png_full_path)
+                png_path_name = 'PNG_COVER/' + png_file_name
+                detail.draw_png = png_path_name
+                detail.save()
+            else:
+                none_detail.append(title)
+                os.remove(draw_path)
+
     return none_detail, yes_detail, sushest_detail
 
 

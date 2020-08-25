@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import (Material, Assortment, Detail, Project, Order, Position, City,
-                     Manufactured, Operation, Transaction, StockageCode)
+                     Manufactured, Operation, Transaction, StockageCode, SystemFile)
 
 admin.site.register(Material)
 admin.site.register(Assortment)
@@ -13,3 +13,4 @@ admin.site.register(Manufactured)
 admin.site.register(Operation)
 admin.site.register(Transaction)
 admin.site.register(StockageCode)
+admin.site.register(SystemFile)

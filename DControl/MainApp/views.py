@@ -1,5 +1,6 @@
 import os
 from openpyxl import load_workbook
+import urllib.request
 
 from django.utils.crypto import get_random_string
 from django.contrib import messages
@@ -8,11 +9,11 @@ from django.contrib.auth.decorators import login_required
 
 from .models import (Material, Assortment, Detail,
                      Project, Order, Position, City,
-                     Manufactured, Operation, Transaction, StockageCode)
+                     Manufactured, Operation, Transaction, StockageCode, SystemFile)
 from .forms import (ProjectCreateForm, MaterialCreateForm, AssortmentCreateForm,
                     DetailCreateForm, OrderCreateForm, OrderSuperCreateForm, OrderDRAWUploadForm,
                     PositionCreateForm, CityCreateForm, ManufacturedCreateForm, OperationCreateForm,
-                    TransactionCreateForm)
+                    TransactionCreateForm, PositionStorageForm, PositionSearch)
 from .handlers import convert_pdf_to_bnp, qr_generator, create_pdf, detail_check, ex_archive, pdf_archive_form
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,10 +21,41 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def index(request):
     details = Detail.objects.all()
+    all_pos = Position.objects.filter(detail=None)
+    positions = None
+    text = ''
+
+    if request.method == 'GET':
+
+        form = PositionSearch(request.GET)
+        print('post')
+
+        if form.is_valid():
+            print('valid')
+            my_request = form.cleaned_data.get('my_request', None)
+            try:
+                positions = Position.objects.filter(detail__title=my_request)
+                print(len(positions))
+                if len(positions) == 0:
+                    text = 'Данная деталь отсутствует в системе'
+            except:
+                print('ex')
+                text = 'Данная деталь отсутствует в системе'
+                messages.success(request,
+                                 # Формирование сообщения со вложенным именем
+                                 f'Данной детали не существует. ')
+
+    else:
+        form = PositionSearch()
+    print(text)
     context = {
         'details': details,
+        'form': form,
+        'all_pos': positions,
+        'text': text,
     }
     return render(request, 'MainApp/HomePage.html', context)
+
 
 @login_required
 def detail_create(request):
@@ -60,13 +92,16 @@ def detail_create(request):
 
     return render(request, 'MainApp/Detail_Create.html', context)
 
+
 @login_required
 def details_all(request):
     all_detail = Detail.objects.all()
+
     context = {
         'all_detail': all_detail,
     }
     return render(request, 'MainApp/All_Details.html', context)
+
 
 @login_required
 def order_create(request):
@@ -88,6 +123,7 @@ def order_create(request):
     }
 
     return render(request, 'MainApp/Order_Create.html', context)
+
 
 @login_required
 def order_super_create(request):
@@ -181,10 +217,25 @@ def order_super_create(request):
 
     return render(request, 'MainApp/Order_Super_Create.html', context)
 
+
 @login_required
 def orders_all(request):
 
     all_orders = Order.objects.all()
+    '''orders = {}
+    for order in all_orders:
+        orders = order.title
+        positions = Position.objects.filter(order=order)
+        position_quantity = 0
+        for position in positions:
+            position_quantity += position.quantity
+            operations = Operation.objects.filter(position=position)
+            operation_remaining_parts = 0
+            for operation in operations:
+                operation_remaining_parts += int(operation.remaining_parts)
+            orders[order.title]['rem'] = operation_remaining_parts
+            orders[order.title]['qua'] = position_quantity
+        print(orders)'''
 
     context = {
         'all_orders': all_orders,
@@ -192,12 +243,25 @@ def orders_all(request):
 
     return render(request, 'MainApp/All_Orders.html', context)
 
+
 @login_required
 def order_view(request, url):
     order = Order.objects.get(pk=url)
     positions = Position.objects.filter(order=order)
     details = Detail.objects.all()
     operations = Operation.objects.all()
+
+    ready_positions = {}
+
+    for position in positions:
+        order_operations = Operation.objects.filter(position=position)
+        ready_operations = 0
+        for operation in order_operations:
+            ready_operations += int(operation.remaining_parts)
+            print(ready_operations)
+        ready_positions[position.detail.title] = ready_operations
+
+    print(ready_positions)
 
     if request.method == 'POST':
 
@@ -221,6 +285,7 @@ def order_view(request, url):
         'details': details,
         'operations': operations,
         'form': form,
+        'ready_positions': ready_positions,
     }
 
     return render(request, 'MainApp/Order.html', context)
@@ -231,12 +296,35 @@ def position_view(request, code):
     operations = Operation.objects.filter(position=position.pk)
     order = Order.objects.get(pk=position.order.pk)
     detail = Detail.objects.get(pk=position.detail.pk)
+    maps = SystemFile.objects.get(title='maps')
+
+    if request.method == 'POST':
+
+        form = PositionStorageForm(request.POST)
+
+        if form.is_valid():
+            position_in = form.cleaned_data.get('position_in', None)
+            print(position_in)
+            try:
+                stockage = StockageCode.objects.get(title=position_in)
+                position.stockage_code = stockage
+                position.save()
+            except:
+                messages.success(request,
+                                 # Формирование сообщения со вложенным именем
+                                 f'Данного места не существует. ')
+
+            return redirect(request.META['HTTP_REFERER'])
+    else:
+        form = PositionStorageForm()
 
     context = {
         'position': position,
         'operations': operations,
         'order': order,
         'detail': detail,
+        'form': form,
+        'maps': maps,
     }
 
     return render(request, 'MainApp/Position.html', context)
@@ -293,6 +381,12 @@ def crete_order_qr_code_list(request, url):
 
 
 def archive_pdf_former(request, url):
-    pdf_archive_form(url)
+    order = Order.objects.get(pk=url)
+    if order.draw_archive:
+        pdf_archive_form(url)
+    else:
+        messages.success(request,
+                         # Формирование сообщения со вложенным именем
+                         f'Архив с чертежами отсутствует!.')
     # ADD MESSAGE
     return redirect(request.META['HTTP_REFERER'])

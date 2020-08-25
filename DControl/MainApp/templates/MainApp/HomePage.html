@@ -4,12 +4,66 @@
 {% load static %}
 {% load crispy_forms_tags %}
 <div class="container mt-4">
+    {% if messages %}
+    <ul class="messages mt-3">
+        {% for message in messages %}
+            <li class="list-group-item list-group-item-danger">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+
     <div class="jumbotron jumbotron-fluid">
       <div class="container">
         <h1 class="display-4">Bonjour!</h1>
         <p class="lead">Добро пожаловать на сайт DControl.</p>
       </div>
+        <hr>
+        <form class="form-inline my-2 my-lg-0" method="get">
+          {% csrf_token %}
+          <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">ПОИСК ПОЗИЦИЙ</a>
+          <input class="form-control mr-sm-4" type="search" placeholder="Ведите название" aria-label="Search" id="{{form.my_request}}
+          <button class="btn btn-primary my-2 my-sm-0" type="submit">ПОИСК</button>
+        </form>
     </div>
+    {% if text|length > 2 %}
+        <ul class="list-group">
+            <li class="list-group-item list-group-item-danger">{{text}}</li>
+        </ul>
+    {% endif %}
+    {% if all_pos %}
+    <table class="table table-bordered">
+      <thead class="thead-light">
+        <tr>
+          <th scope="col">#</th>
+          <th scope="col">ПОЗИЦИЯ</th>
+          <th scope="col">ЗАКАЗ</th>
+          <th scope="col">ПРОЕКТ</th>
+          <th scope="col">АВТОР</th>
+          <th scope="col">СОЗДАН</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for position in all_pos %}
+        <tr>
+          <th scope="row">{{position.pk}}</th>
+          <td>{{position.detail.title}}</td>
+          <td class="clickable-row" data-href="{% url 'order_view' url=position.order.pk %}">{{position.order.title}}</td>
+          <td>{{position.order.project}}</td>
+          <td>{{position.order.author}}</td>
+          <td>{{position.order.create}}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
 </div>
+<script>
+    jQuery(document).ready(function($) {
+        $(".clickable-row").click(function() {
+            window.location = $(this).data("href");
+        });
+    });
+</script>
+
 
 {% endblock %}

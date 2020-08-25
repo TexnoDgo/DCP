@@ -2,7 +2,15 @@
 {% block title %}DControl - Позиция № {{position.pk}}{% endblock %}
 {% block content %}
 {% load static %}
+{% load crispy_forms_tags %}
 <div class="container mb-5">
+    {% if messages %}
+    <ul class="messages mt-3">
+        {% for message in messages %}
+            <li class="list-group-item list-group-item-danger">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
     <section class="jumbotron  mt-3">
         <div class="container">
             <div class="text-center">
@@ -20,8 +28,53 @@
                     <p class="lead text-muted">Проект - {{order.project.title}}</p>
                     <p class="lead text-muted">Дата готовности - {{order.readiness}}</p>
                 </div>
-                <div>
-                    <img src="{{position.qr_code.url}}" width="250">
+                <div class="text-center">
+                    <img src="{{position.qr_code.url}}" width="250"><br>
+                    <p class="lead text-muted">
+                        <h4><span class="badge badge-warning">
+                            Месторасположение детали - {{position.stockage_code}}
+                        </span></h4>
+                    </p>
+                    <!-- Button trigger modal -->
+                    <button type="button" class="btn btn-outline-warning col" data-toggle="modal" data-target="#exampleModal">
+                      СМЕНИТЬ МЕСТОРАСПОЛОЖЕНИЕ
+                    </button>
+
+                    <!-- Modal -->
+                    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                      <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                          <div class="modal-header">
+                            <h5 class="modal-title" id="exampleModalLabel">
+                                Выбор месторасположение детали
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                              <span aria-hidden="true">&times;</span>
+                            </button>
+                          </div>
+                            <img src="{{ maps.file.url }}" class="card-img-top col" alt="...">
+                            <form method="post">
+                                <div class="modal-body">
+                                {% csrf_token %}
+
+                                <div class="form-group">
+                                    <select class="form-control" id="{{form.position_in}}
+                                        <option>Бокс 1 - Стеллаж 1 - Полка 1</option>
+                                        <option>Бокс 2 - Стеллаж 1 - Полка 1</option>
+                                        <option>Бокс 3 - Стеллаж 1 - Полка 1</option>
+                                        <option>Бокс 3 - Стеллаж 2 - Полка 1</option>
+
+                                    </select>
+                                </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Отменить</button>
+                                    <button type="submit" class="btn btn-primary">Выбрать</button>
+                                </div>
+                            </form>
+                        </div>
+                      </div>
+                    </div>
                 </div>
             </div>
 
@@ -29,10 +82,20 @@
     </section>
     <ul class="list-group list-group-horizontal mt-4">
         {% for operation in operations %}
-            <a href="{% url 'operation_view' url=position.pk %}" class="list-group-item list-group-item-action list-group-item-primary d-flex justify-content-between align-items-center col mb-4">
-                {{operation.manufactured.title}}
-               <span class="badge badge-dark">{{operation.remaining_parts}}</span>
-            </a>
+            {% if operation.remaining_parts == 0 %}
+                <a href="{% url 'operation_view' url=operation.pk %}" class="list-group-item list-group-item-action
+                 list-group-item-primary d-flex justify-content-between align-items-center col mb-4 disabled">
+                    {{operation.manufactured.title}}
+                   <span class="badge badge-dark">{{operation.remaining_parts}}</span>
+                </a>
+            {% else %}
+                <a href="{% url 'operation_view' url=operation.pk %}" class="list-group-item list-group-item-action
+                 list-group-item-primary d-flex justify-content-between align-items-center col mb-4">
+                    {{operation.manufactured.title}}
+                   <span class="badge badge-dark">ОСТАЛОСЬ - {{operation.remaining_parts}}</span>
+                </a>
+            {% endif %}
+
         {% endfor %}
     </ul>
     <div class="card mb-3">
