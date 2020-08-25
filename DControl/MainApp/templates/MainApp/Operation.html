@@ -4,55 +4,52 @@
 {% load static %}
 {% load crispy_forms_tags %}
 <div class="container">
-    <h1>DControl - Операция {{operation.manufactured}}</h1>
-    <ul class="list-group list-group-horizontal" align="center">
-        <li class="list-group-item col-4">ЗАКАЗ</li>
-        <a href="{% url 'order_view' url=operation.position.order.pk %}" class="list-group-item  active list-group-item-action col-8"><h6>{{operation.position.order.title}}</h6></a>
-    </ul>
-    <ul class="list-group list-group-horizontal mt-2" align="center">
-        <li class="list-group-item col-4">ПРОЕКТ</li>
-        <a href="#" class="list-group-item list-group-item-action active col-8"><h6>{{operation.position.order.project.title}}</h6></a>
-    </ul>
-    <ul class="list-group list-group-horizontal mt-2" align="center">
-        <li class="list-group-item col-4">ДЕТАЛЬ</li>
-        <a href="{% url 'position_view' code=operation.position.code %}" class="list-group-item list-group-item-action active col-8"><h6>{{operation.position.detail.title}}</h6></a>
-    </ul>
-    <hr>
-    <table class="table mt-2">
-        <thead class="thead-dark" style="font-size: 1em;">
-            <tr align="center">
-                <th scope="col">Деталей необходимо</th>
-                <th scope="col">Деталей изготовленно</th>
-                <th scope="col">Деталей осталось</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr align="center" style="font-size: 1.5em;">
-                <th scope="col">{{operation.position.quantity}}</th>
-                <td class="col">{{difference}}</td>
-                <td class="col">{{operation.remaining_parts}}</td>
-            </tr>
-        </tbody>
-    </table>
-
-    <hr>
-
-    <form method="POST" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{form|crispy}}
-        <button class="btn-success col btn-lg" type="submit">СОЗДАТЬ</button>
-    </form>
-
-    <hr>
-
     {% if messages %}
-    <ul class="messages">
+    <ul class="messages mt-3">
         {% for message in messages %}
             <li class="list-group-item list-group-item-danger">{{ message }}</li>
         {% endfor %}
     </ul>
     {% endif %}
+    <section class="jumbotron  mt-3">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="jumbotron-heading">DControl - Операция {{operation.manufactured}}</h1>
+                <h3 class="jumbotron-heading">Для детали - {{ operation.position.detail.title }}</h3>
+                <hr>
+            </div>
+            <div class="d-flex justify-content-between">
+                <div class="col-5">
+                    <p class="lead text-muted">Деталей необходимо - {{operation.position.quantity}}</p>
+                    <p class="lead text-muted">Деталей изготовленно - {{difference}}</p>
+                    <p class="lead text-muted">Деталей осталось - {{operation.remaining_parts}}</p>
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        {{form|crispy}}
+                        <button class="btn-success col btn-lg" type="submit">СОЗДАТЬ</button>
+                    </form>
+                </div>
+                <div class="col-7">
+                    <ul class="list-group list-group-horizontal" align="center">
+                        <li class="list-group-item col-4">ЗАКАЗ</li>
+                        <a href="{% url 'order_view' url=operation.position.order.pk %}" class="list-group-item  list-group-item-success list-group-item-action col-8"><h6>{{operation.position.order.title}}</h6></a>
+                    </ul>
+                    <ul class="list-group list-group-horizontal mt-2" align="center">
+                        <li class="list-group-item col-4">ПРОЕКТ</li>
+                        <a href="#" class="list-group-item list-group-item-action list-group-item-success col-8"><h6>{{operation.position.order.project.title}}</h6></a>
+                    </ul>
+                    <ul class="list-group list-group-horizontal mt-2" align="center">
+                        <li class="list-group-item col-4">ДЕТАЛЬ</li>
+                        <a href="{% url 'position_view' code=operation.position.code %}" class="list-group-item list-group-item-action list-group-item-success col-8"><h6>{{operation.position.detail.title}}</h6></a>
+                    </ul>
+                </div>
+            </div>
 
+        </div>
+    </section>
+
+
+    <hr>
     <table class="table" >
         <thead class="thead-dark" style="font-size: 1em;">
             <tr align="center">
@@ -73,4 +70,5 @@
     </table>
 
 </div>
+
 {% endblock %}

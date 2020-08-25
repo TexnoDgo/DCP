@@ -4,77 +4,71 @@
 {% load static %}
 {% load crispy_forms_tags %}
 <div class="container">
-    <section class="jumbotron text-center mt-3">
+    <section class="jumbotron  mt-3">
         <div class="container">
-          <h1 class="jumbotron-heading">DControl - Заказ № {{order.pk}}</h1>
-          <p class="lead text-muted"></p>
+            <div class="text-center">
+                <h1 class="jumbotron-heading">DControl - Заказ № {{order.pk}}</h1>
+            </div>
+
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="lead text-muted">Название заказа - {{order.title}}</p>
+                        <p class="lead text-muted">Автор заказа - {{order.author}}</p>
+                        <p class="lead text-muted">Проект - {{order.project.title}}</p>
+                        <p class="lead text-muted">Дата готовности - {{order.readiness}}</p>
+                    </div>
+                    <div align="center">
+                        <a href="{{order.qr_code_list.url}}" type="button" class="btn btn-outline-info col">ОТКРЫТЬ QR-CODE PDF</a><br>
+                        <a href="{{order.qr_code_list.url}}" type="button" class="btn btn-outline-danger col mt-2" download>СКАЧАТЬ QR-CODE PDF</a><br>
+
+                        <button type="button" class="btn btn btn-outline-warning col mt-2" data-toggle="modal" data-target="#exampleModalCenter">
+                          ЗАГРУЗИТЬ ЧЕРТЕЖИ PDF
+                        </button><br>
+                        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                          <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalCenterTitle">Загрузка чертежей для заказа {{order.title}} #{{order.pk}}</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                            <form method="POST" enctype="multipart/form-data">
+                              <div class="modal-body">
+                                    {% csrf_token %}
+                                    <div>
+                                        {{form.archive}}
+                                    </div>
+                                    <div>
+                                        {{form.flag}}
+                                        Присвоить чертежи деталям?(<small>Нет по умолчанию</small>)
+                                    </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                                <button type="submit" class="btn btn-primary">Загрузить</button>
+                              </div>
+                            </form>
+                            </div>
+                          </div>
+                        </div>
+
+                        {% if order.archive_ready %}
+                            <a href="{{order.draw_archive.url}}" type="button" class="btn btn-outline-success col mt-2">СКАЧАТЬ PDF АРХИВ ЧЕРТЕЖЕЙ</a>
+                        {% else %}
+                            <a href="{% url 'archive_pdf_former' url=order.pk %}" type="button" class="btn btn-outline-secondary col mt-2">СФОРМИРОВАТЬ PDF АРХИВ ЧЕРТЕЖЕЙ</a>
+                        {% endif %}
+                    </div>
+                </div>
+
         </div>
     </section>
-    <table class="table table-bordered">
-        <thead>
-            <tr>
-                <th>Название заказа</th>
-                <th>{{order.title}}</th>
-            </tr>
-            <tr>
-                <th>Автор заказа</th>
-                <th>{{order.author}}</th>
-            </tr>
-            <tr>
-                <th scope="col">Проект</th>
-                <th scope="col">{{order.project.title}}</th>
-            </tr>
-            <tr>
-                <th scope="col">Дата готовности</th>
-                <th scope="col">{{order.readiness}}</th>
-            </tr>
-        </thead>
-    </table>
+    <hr>
+    <small>
+        ОЗ - Опытынй завод; НИИЛР - НИИ Лазерная Резка; АС - Альянс Сталь; CNCMW - CNC MetalWork; ПК1 - Покрытие №1; ПК2 - Покрытие №2; ДР - Другой; МХ - Место хранения.
+    </small>
 
-    <div align="center">
-    <a href="{{order.qr_code_list.url}}" type="button" class="btn btn-outline-info">ОТКРЫТЬ QR-CODE PDF</a>
-    <a href="{{order.qr_code_list.url}}" type="button" class="btn btn-outline-danger " download>СКАЧАТЬ QR-CODE PDF</a>
-
-    <button type="button" class="btn btn btn-outline-warning" data-toggle="modal" data-target="#exampleModalCenter">
-      ЗАГРУЗИТЬ ЧЕРТЕЖИ PDF
-    </button>
-    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-      <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title" id="exampleModalCenterTitle">Загрузка чертежей для заказа {{order.title}} #{{order.pk}}</h5>
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-              <span aria-hidden="true">&times;</span>
-            </button>
-          </div>
-        <form method="POST" enctype="multipart/form-data">
-          <div class="modal-body">
-                {% csrf_token %}
-                <div>
-                    {{form.archive}}
-                </div>
-                <div>
-                    {{form.flag}}
-                    Присвоить чертежи деталям?(<small>Нет по умолчанию</small>)
-                </div>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
-            <button type="submit" class="btn btn-primary">Загрузить</button>
-          </div>
-        </form>
-        </div>
-      </div>
-    </div>
-
-    {% if order.archive_ready %}
-        <a href="{{order.draw_archive.url}}" type="button" class="btn btn-outline-success">СКАЧАТЬ PDF АРХИВ ЧЕРТЕЖЕЙ</a>
-    {% else %}
-        <a href="{% url 'archive_pdf_former' url=order.pk %}" type="button" class="btn btn-outline-secondary">СФОРМИРОВАТЬ PDF АРХИВ ЧЕРТЕЖЕЙ</a>
-    {% endif %}
-    </div>
-
-    <table class="table mt-2" style="font-size: 0.8em;">
+    <table class="table table-bordered col mt-2" style="font-size: 0.8em;">
         <thead class="thead-dark">
             <tr align="center">
             <th scope="col">#</th>
@@ -82,13 +76,15 @@
             <th scope="col">КОЛИЧЕСТВО</th>
             <th scope="col">МАТЕРИАЛ</th>
             <th scope="col">СОРТАМЕНТ</th>
-            <th scope="col">Опытынй завод</th>
-            <th scope="col">НИИ Лазерная Резка</th>
-            <th scope="col">Альянс Сталь</th>
-            <th scope="col">CNC MetalWork</th>
-            <th scope="col">Покрытие №1</th>
-            <th scope="col">Покрытие №2</th>
-            <th scope="col">Другой</th>
+            <th scope="col">ВЕЛИЧИНА</th>
+            <th scope="col">ОЗ</th>
+            <th scope="col">НИИЛРа</th>
+            <th scope="col">АС</th>
+            <th scope="col">CNCMW</th>
+            <th scope="col">ПК1</th>
+            <th scope="col">ПК2</th>
+            <th scope="col">ДР</th>
+            <th scope="col">МХ</th>
           </tr>
         </thead>
         <tbody>
@@ -97,75 +93,79 @@
           {% if position %}
 
             <tr align="center">
-              <th scope="row" >{{position.detail.id}}</th>
-              <td class="col" >
+                <th scope="row" >{{position.detail.id}}</th>
+                <td class="col" >
                   <a href="{% url 'position_view' code=position.code %}">{{position.detail.title}}</a>
-              </td>
-              <td class="col">{{position.quantity}}</td>
-              <td class="col">{{position.detail.material}}</td>
-              <td class="col">{{position.detail.assortment}}</td>
+                </td>
+                <td class="col">{{position.quantity}}</td>
+                <td class="col">{{position.detail.material}}</td>
+                <td class="col">{{position.detail.assortment}}</td>
+                <td class="col">{{position.detail.thickness_diameter}}</td>
                 <td class="col">
-                    {% for operation in operations %}
-                        {% if operation.position == position %}
-                            {% if operation.manufactured.title == "Опытынй завод" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
-                            {% endif %}
+                {% for operation in operations %}
+                    {% if operation.position == position %}
+                        {% if operation.manufactured.title == "Опытынй завод" %}
+                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                         {% endif %}
-                    {% endfor %}
+                    {% endif %}
+                {% endfor %}
                 </td>
                 <td class="col" >
-                    {% for operation in operations %}
-                        {% if operation.position == position %}
-                            {% if operation.manufactured.title == "НИИ Лазерная Резка" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
-                            {% endif %}
+                {% for operation in operations %}
+                    {% if operation.position == position %}
+                        {% if operation.manufactured.title == "НИИ Лазерная Резка" %}
+                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                         {% endif %}
-                    {% endfor %}
+                    {% endif %}
+                {% endfor %}
                 </td>
                 <td class="col">
-                    {% for operation in operations %}
-                        {% if operation.position == position %}
-                            {% if operation.manufactured.title == "Альянс Сталь" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
-                            {% endif %}
+                {% for operation in operations %}
+                    {% if operation.position == position %}
+                        {% if operation.manufactured.title == "Альянс Сталь" %}
+                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                         {% endif %}
-                    {% endfor %}
+                    {% endif %}
+                {% endfor %}
                 </td>
                 <td class="col">
-                    {% for operation in operations %}
-                        {% if operation.position == position %}
-                            {% if operation.manufactured.title == "CNC MetalWork" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
-                            {% endif %}
+                {% for operation in operations %}
+                    {% if operation.position == position %}
+                        {% if operation.manufactured.title == "CNC MetalWork" %}
+                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                         {% endif %}
-                    {% endfor %}
+                    {% endif %}
+                {% endfor %}
                 </td>
                 <td class="col">
-                    {% for operation in operations %}
-                        {% if operation.position == position %}
-                            {% if operation.manufactured.title == "Покрытие №1" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
-                            {% endif %}
+                {% for operation in operations %}
+                    {% if operation.position == position %}
+                        {% if operation.manufactured.title == "Покрытие №1" %}
+                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                         {% endif %}
-                    {% endfor %}
+                    {% endif %}
+                {% endfor %}
                 </td>
                 <td class="col">
-                    {% for operation in operations %}
-                        {% if operation.position == position %}
-                            {% if operation.manufactured.title == "Покрытие №2" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
-                            {% endif %}
+                {% for operation in operations %}
+                    {% if operation.position == position %}
+                        {% if operation.manufactured.title == "Покрытие №2" %}
+                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                         {% endif %}
-                    {% endfor %}
+                    {% endif %}
+                {% endfor %}
                 </td>
                 <td class="col">
-                    {% for operation in operations %}
-                        {% if operation.position == position %}
-                            {% if operation.manufactured.title == "Другой" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
-                            {% endif %}
+                {% for operation in operations %}
+                    {% if operation.position == position %}
+                        {% if operation.manufactured.title == "Другой" %}
+                            <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
                         {% endif %}
-                    {% endfor %}
+                    {% endif %}
+                {% endfor %}
+                </td>
+                <td class="col">
+                    {{position.stockage_code}}
                 </td>
             </tr>
           {% endif %}

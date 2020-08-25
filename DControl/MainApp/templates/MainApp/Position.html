@@ -3,47 +3,41 @@
 {% block content %}
 {% load static %}
 <div class="container mb-5">
-    <section class="jumbotron text-center mt-3">
+    <section class="jumbotron  mt-3">
         <div class="container">
-          <h1 class="jumbotron-heading">DControl - Позиция № {{position.pk}}</h1>
-          <p class="lead text-muted"></p>
+            <div class="text-center">
+                <h1 class="jumbotron-heading">DControl - Позиция № {{position.pk}}</h1>
+                <hr>
+            </div>
+
+            <div class="d-flex justify-content-between">
+                <div>
+                    <h5 class="card-title">{{detail.title}} - {{position.quantity}} штуки.</h5>
+                    <p class="card-text">Заготовка - {{detail.material}} {{detail.assortment}} {{detail.thickness_diameter}} мм.</p>
+                    <hr>
+                    <p class="lead text-muted">Название заказа - {{order.title}}</p>
+                    <p class="lead text-muted">Автор заказа - {{order.author}}</p>
+                    <p class="lead text-muted">Проект - {{order.project.title}}</p>
+                    <p class="lead text-muted">Дата готовности - {{order.readiness}}</p>
+                </div>
+                <div>
+                    <img src="{{position.qr_code.url}}" width="250">
+                </div>
+            </div>
+
         </div>
     </section>
-    <div class="card mb-3">
-      <img src="{{position.detail.draw_png.url}}" class="card-img-top" alt="...">
-      <div class="card-body" align="center">
-          <ul class="list-group list-group-horizontal">
-            <li class="list-group-item col">
-                <h5 class="card-title">{{detail.title}} - {{position.quantity}} штуки.</h5>
-                <p class="card-text">Заготовка - {{detail.material}} {{detail.assortment}} {{detail.thickness_diameter}} мм.</p>
-                <p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>
-            </li>
-                <li class="list-group-item col">
-                    <img src="{{position.qr_code.url}}" width="200">
-                </li>
-            </ul>
-
-      </div>
-    </div>
-    <ul class="list-group list-group-horizontal ">
-      <li class="list-group-item col">Название заказа</li>
-      <li class="list-group-item list-group-item-info col">{{order.title}}</li>
-      <li class="list-group-item col">Автор заказа</li>
-      <li class="list-group-item list-group-item-info col ">{{order.author}}</li>
-    </ul>
-    <ul class="list-group list-group-horizontal mt-1">
-      <li class="list-group-item col">Проект</li>
-      <li class="list-group-item list-group-item-info col">{{order.project.title}}</li>
-      <li class="list-group-item col">Дата готовности</li>
-      <li class="list-group-item list-group-item-info col">{{order.readiness}}</li>
-    </ul>
     <ul class="list-group list-group-horizontal mt-4">
         {% for operation in operations %}
-        <a href="#" class="list-group-item list-group-item-action list-group-item-primary d-flex justify-content-between align-items-center col">
-            {{operation.manufactured.title}}
-           <span class="badge badge-dark">{{operation.remaining_parts}}</span>
-        </a>
+            <a href="{% url 'operation_view' url=position.pk %}" class="list-group-item list-group-item-action list-group-item-primary d-flex justify-content-between align-items-center col mb-4">
+                {{operation.manufactured.title}}
+               <span class="badge badge-dark">{{operation.remaining_parts}}</span>
+            </a>
         {% endfor %}
     </ul>
+    <div class="card mb-3">
+      <img src="{{position.detail.draw_png.url}}" class="card-img-top" alt="...">
+    </div>
+
 </div>
 {% endblock %}

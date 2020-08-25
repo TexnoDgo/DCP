@@ -9,7 +9,7 @@
           <p class="lead text-muted"></p>
         </div>
     </section>
-  <table class="table">
+  <table class="table table-bordered">
     <thead class="thead-dark">
       <tr>
         <th scope="col">#</th>
@@ -19,6 +19,7 @@
         <th scope="col">СОЗДАНА</th>
         <th scope="col">МАТЕРИАЛ</th>
         <th scope="col">СОРТАМЕНТ</th>
+        <th scope="col">ВЕЛИЧИНА</th>
       </tr>
     </thead>
     <tbody>
@@ -37,6 +38,8 @@
           <td>{{detail.create}}</td>
           <td>{{detail.material}}</td>
           <td>{{detail.assortment}}</td>
+          <td>{{detail.thickness_diameter}}</td>
+
         </tr>
       {% endif %}
       {% endfor %}
