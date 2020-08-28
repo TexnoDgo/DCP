@@ -25,8 +25,8 @@
                         <p class="lead text-muted">Дата готовности - {{order.readiness}}</p>
                     </div>
                     <div align="center">
-                        <a href="{{order.qr_code_list.url}}" type="button" class="btn btn-outline-info col">ОТКРЫТЬ QR-CODE PDF</a><br>
-                        <a href="{{order.qr_code_list.url}}" type="button" class="btn btn-outline-danger col mt-2" download>СКАЧАТЬ QR-CODE PDF</a><br>
+                        <a href="{{order.qr_code_list.url|slice:'6:'}}" type="button" class="btn btn-outline-info col">ОТКРЫТЬ QR-CODE PDF</a><br>
+                        <a href="{{order.qr_code_list.url|slice:'6:'}}" type="button" class="btn btn-outline-danger col mt-2" download>СКАЧАТЬ QR-CODE PDF</a><br>
 
                         <button type="button" class="btn btn btn-outline-warning col mt-2" data-toggle="modal" data-target="#exampleModalCenter">
                           ЗАГРУЗИТЬ ЧЕРТЕЖИ PDF
@@ -61,7 +61,7 @@
                         </div>
 
                         {% if order.archive_ready %}
-                            <a href="{{order.draw_archive.url}}" type="button" class="btn btn-outline-success col mt-2">СКАЧАТЬ PDF АРХИВ ЧЕРТЕЖЕЙ</a>
+                            <a href="{{order.draw_archive.url|slice:'6:'}}" type="button" class="btn btn-outline-success col mt-2">СКАЧАТЬ PDF АРХИВ ЧЕРТЕЖЕЙ</a>
                         {% else %}
                             <a href="{% url 'archive_pdf_former' url=order.pk %}" type="button" class="btn btn-outline-secondary col mt-2">СФОРМИРОВАТЬ PDF АРХИВ ЧЕРТЕЖЕЙ</a>
                         {% endif %}

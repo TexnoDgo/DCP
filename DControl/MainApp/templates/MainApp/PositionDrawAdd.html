@@ -1,0 +1,14 @@
+{% extends "MainApp/base.html" %}
+{% block title %}DControl - Сменить чертеж для позиции {{position.pk}}{% endblock %}
+{% block content %}
+{% load static %}
+{% load crispy_forms_tags %}
+<div class="container mb-5">
+
+    <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+        {{form.draw}}
+        <button type="submit" class="btn btn-success btn-lg">ЗАГРУЗИТЬ</button>
+    </form>
+</div>
+{% endblock %}

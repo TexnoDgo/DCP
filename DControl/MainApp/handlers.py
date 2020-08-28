@@ -15,17 +15,22 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def qr_generator(title):
-    # host = settings.ALLOWED_HOSTS[0]
-    # detail_view_url = 'http://' + str(host) + '/all/Position/' + title
-    detail_view_url = 'http://127.0.0.1:8000/all/Position/' + title
+    host = settings.ALLOWED_HOSTS[0]
+    detail_view_url = 'http://' + str(host) + '/all/Position/' + title
+    #detail_view_url = 'http://127.0.0.1:8000/all/Position/' + title
     text = str(title)
     img = qrcode.make(detail_view_url)
     img_path = os.path.join(BASE_DIR, 'media/QR_CODE/') + text + '.png'
     try:
         img.save(img_path)
+        
+        # filename convert
+        img_name = 'media/QR_CODE/' + text + '.png'
+        print(img_path, '>' , img_name)
+        
     except:
         print('Error save')
-    return img_path
+    return img_name
 
 
 def convert_pdf_to_bnp(infile, outfile):
@@ -40,6 +45,11 @@ def create_pdf(order):
     positions = Position.objects.filter(order=order)
     f_n = (str(order.title) + " #" + str(order.pk))
     file_name = os.path.join(BASE_DIR, 'media/QR_CODE_LIST/') + '{}.pdf'.format(f_n)
+    
+    # filename convert
+    new_file_name = 'media/QR_CODE_LIST/' + '{}.pdf'.format(f_n)
+    print(file_name, '>', new_file_name)
+    
     documentTitle = '{} #{}'.format(order.title, order.pk)
     pdf = canvas.Canvas(file_name)
     pdfmetrics.registerFont(TTFont('FreeSans', os.path.join(BASE_DIR, 'MainApp/FreeSans.ttf')))
@@ -106,8 +116,10 @@ def create_pdf(order):
         crete_one_pos(x, y, detail_title, position_code, position_quantity, order, img)
 
     pdf.save()
+    
+    
 
-    return file_name
+    return new_file_name
 
 
 def detail_check(title):
@@ -195,7 +207,9 @@ def pdf_archive_form(url):
         finally:
             print('close')
     archive.close()
-    order.draw_archive = new_archive_path
+    archive_name = 'media/DRAW_ARCHIVE/' + archive_name
+    print(archive_name)
+    order.draw_archive = archive_name
     order.archive_ready = True
     order.save()
     os.remove(old_archive_path)

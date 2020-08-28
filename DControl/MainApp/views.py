@@ -4,6 +4,7 @@ import urllib.request
 
 from django.utils.crypto import get_random_string
 from django.contrib import messages
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 
@@ -14,7 +15,7 @@ from .models import (Material, Assortment, Detail,
 from .forms import (ProjectCreateForm, MaterialCreateForm, AssortmentCreateForm,
                     DetailCreateForm, OrderCreateForm, OrderSuperCreateForm, OrderDRAWUploadForm,
                     PositionCreateForm, CityCreateForm, ManufacturedCreateForm, OperationCreateForm,
-                    TransactionCreateForm, PositionStorageForm, PositionSearch)
+                    TransactionCreateForm, PositionStorageForm, PositionSearch, PositionDrawAdd)
 from .handlers import convert_pdf_to_bnp, qr_generator, create_pdf, detail_check, ex_archive, pdf_archive_form
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -22,6 +23,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def index(request):
     details = Detail.objects.all()
+    detail_list = []
+    for detail in details:
+      detail_list.append(detail.title)
     all_pos = Position.objects.filter(detail=None)
     positions = None
     text = ''
@@ -54,6 +58,7 @@ def index(request):
         'form': form,
         'all_pos': positions,
         'text': text,
+        'detail_list': detail_list,
     }
     return render(request, 'MainApp/HomePage.html', context)
 
@@ -292,6 +297,7 @@ def order_view(request, url):
     return render(request, 'MainApp/Order.html', context)
 
 
+@login_required
 def position_view(request, code):
     position = Position.objects.get(code=code)
     operations = Operation.objects.filter(position=position.pk)
@@ -333,6 +339,49 @@ def position_view(request, code):
     return render(request, 'MainApp/Position.html', context)
 
 
+@login_required
+def position_draw_change(request, code):
+    position = Position.objects.get(code=code)
+    detail = Detail.objects.get(pk=position.detail.pk)
+    
+    if request.method == 'POST':
+        print('post')
+        
+        form = PositionDrawAdd(request.POST, request.FILES)
+        
+        if form.is_valid():
+            draw = form.cleaned_data.get('draw', None)
+            print(draw)
+            print('YES!')
+            pdf_file_name = str(detail.draw_pdf)
+            print(pdf_file_name)  # Delete
+            png_file_name = '{}{}'.format(pdf_file_name[9:-3], 'png')
+            print(png_file_name)  # Delete
+            png_full_path = os.path.join(BASE_DIR, 'media/PNG_COVER/') + png_file_name
+            print(png_full_path)  # Delete
+            convert_pdf_to_bnp(detail.draw_pdf.path, png_full_path)
+            png_path_name = 'PNG_COVER/' + png_file_name
+            print(png_path_name)
+            detail.draw_png = png_path_name
+            detail.save()
+            
+            return redirect('position_view', code)
+    
+    else:
+        print('else')
+        form = PositionDrawAdd()
+    
+    context = {
+      'position': position,
+      'detail': detail,
+      'form': form,
+    }
+    
+    return render(request, 'MainApp/PositionDrawAdd.html', context)
+        
+
+
+@login_required
 def operation_view(request, url):
     operation = Operation.objects.get(pk=url)
     transactions = Transaction.objects.filter(operation=operation)

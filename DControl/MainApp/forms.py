@@ -51,12 +51,17 @@ class PositionCreateForm(forms.ModelForm):
 
 
 class PositionStorageForm(forms.Form):
-    position_in = forms.CharField(max_length=40)
+    position_in = forms.CharField(max_length=50)
     fields = ['position_in']
+    
+
+class PositionDrawAdd(forms.Form):
+    draw = forms.FileField()
+    fields = ['draw']
 
 
 class PositionSearch(forms.Form):
-    my_request = forms.CharField(max_length=30)
+    my_request = forms.CharField(max_length=50)
     fields = ['my_request']
 
 

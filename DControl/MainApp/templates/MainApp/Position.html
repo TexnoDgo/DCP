@@ -29,7 +29,7 @@
                     <p class="lead text-muted">Дата готовности - {{order.readiness}}</p>
                 </div>
                 <div class="text-center">
-                    <img src="{{position.qr_code.url}}" width="250"><br>
+                    <img src="{{position.qr_code.url|slice:'6:'}}" width="250"><br>
                     <p class="lead text-muted">
                         <h4><span class="badge badge-warning">
                             Месторасположение детали - {{position.stockage_code}}
@@ -39,6 +39,7 @@
                     <button type="button" class="btn btn-outline-warning col" data-toggle="modal" data-target="#exampleModal">
                       СМЕНИТЬ МЕСТОРАСПОЛОЖЕНИЕ
                     </button>
+                    <a href="{% url 'position_draw_change' code=position.code %}" class="btn btn-outline-success col mt-3">CHANGE DRAW</a>
 
                     <!-- Modal -->
                     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
