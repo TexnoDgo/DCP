@@ -54,22 +54,38 @@
                 </div>
               </li>
                 <li class="nav-item dropdown">
-                <a class="nav-link dropdown-toggle disabled" href="#" id="navbarDropdown3" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                  ПРОЕКТЫ
-                </a>
-                <div class="dropdown-menu" aria-labelledby="navbarDropdown3">
-                  <a class="dropdown-item" href="#">Action</a>
-                  <a class="dropdown-item" href="#">Another action</a>
-                  <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">Something else here</a>
-                </div>
-              </li>
+                    <a class="nav-link dropdown-toggle disabled" href="#" id="navbarDropdown3" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      ПРОЕКТЫ
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown3">
+                      <a class="dropdown-item" href="#">Action</a>
+                      <a class="dropdown-item" href="#">Another action</a>
+                      <div class="dropdown-divider"></div>
+                      <a class="dropdown-item" href="#">Something else here</a>
+                    </div>
+                  </li>
+                {% if user.profile.status != 'A' and user.is_authenticated %}
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown4" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                      ПРОИЗВОДСТВО
+                    </a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown4">
+                        {% for manufactured in manufactureds %}
+                      <a class="dropdown-item" href="{% url 'manufactured' url=manufactured.pk %}">{{manufactured.title}}</a>
+                      <div class="dropdown-divider"></div>
+                        {% endfor %}
+                    </div>
+                  </li>
+                  {% endif %}
                 <li class="nav-item">
-                <a class="nav-link disabled" href="#">ИНСТРУКЦИЯ ПОЛЬЗОВАНИЯ</a>
-              </li>
-              <li class="nav-item">
+                  <a class="nav-link disabled" href="#">ИНСТРУКЦИЯ ПОЛЬЗОВАНИЯ</a>
+                </li>
+                <li class="nav-item">
+                <a class="nav-link" href="{% url 'blog_create' %}" tabindex="-1" aria-disabled="true">BLOG</a>
+                </li>
+                <li class="nav-item">
                 <a class="nav-link disabled" href="#" tabindex="-1" aria-disabled="true">Disabled</a>
-              </li>
+                </li>
             </ul>
 
             <div class="btn-group mr-4 ml-4" role="group">
@@ -83,6 +99,9 @@
                     <a class="dropdown-item" href="{% url 'logout'%}">ВЫХОД</a>
                 </div>
                 {% else %}
+                    <a href="{% url 'signup'%}" class="btn btn btn-outline-danger">
+                        РЕГИСТРАЦИЯ
+                    </a>
                     <a href="{% url 'login'%}" class="btn btn btn-outline-danger">
                         ВОЙТИ
                     </a>

@@ -27,7 +27,7 @@ SECRET_KEY = '=jhfm!8!9^yx5*e=_kt!vke-8fc1i0@o%uf@q*t-g0v*9i&kb+'
 DEBUG = True
 
 # ALLOWED_HOSTS = ['127.0.0.1']
-ALLOWED_HOSTS = ['18.156.166.58']
+ALLOWED_HOSTS = ['217.12.193.46','192.168.50.151', 'localhost']
 
 
 # Application definition
@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'crispy_forms',
+    'bootstrap_pagination',
     'MainApp',
 ]
 

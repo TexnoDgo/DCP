@@ -1,0 +1,186 @@
+{% extends "MainApp/base.html" %}
+{% block title %}DControl - Производство {{manufactured.title}} {% endblock %}
+{% block content %}
+{% load static %}
+{% load crispy_forms_tags %}
+{% load bootstrap_pagination %}
+<div class="container">
+    {% if messages %}
+    <ul class="messages mt-3">
+        {% for message in messages %}
+            <li class="list-group-item list-group-item-danger">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <section class="jumbotron jumbotron-fluid  mt-3">
+        <div class="container">
+            <div class="text-center">
+                <h2 class="jumbotron-heading">DControl - Производство "{{manufactured.title}}" </h2>
+                <p class="lead text-muted"></p>
+                <hr>
+            </div>
+            <div class="d-flex justify-content-between">
+                <div class="col-5">
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    
+    <nav>
+      <div class="nav nav-tabs" id="nav-tab" role="tablist" align="center">
+        <a class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Таблица</a>
+        <a class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Коллаж</a>
+      </div>
+    </nav>
+    <div class="tab-content" id="nav-tabContent">
+      <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+        <table class="table table-striped">
+          <thead>
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Деталь</th>
+                <th scope="col">Кол-во</th>
+                <th scope="col">Материал</th>
+                <th scope="col">Сортамент</th>
+                <th scope="col">Толщана/Диаметр</th>
+                <th scope="col">The remainder</th>
+                <th scope="col">В работе</th>
+                <th scope="col">Готово</th>
+            </tr>
+          </thead>
+          <tbody>
+              {% for operation in operations %}
+                    <tr>
+                      <td>{{ operation.pk }}</td>
+                      <td class="clickable-row" data-href="{% url 'position_view' code=operation.position.code %}">{{ operation.position.detail.title }}</td>
+                      <td>{{ operation.position.quantity }}</td>
+                      <td>{{ operation.position.detail.material }}</td>
+                      <td>{{ operation.position.detail.assortment }}</td>
+                      <td>{{ operation.position.detail.thickness_diameter }}</td>
+                      <td>{{operation.remaining_parts}}</td>
+                      <td>
+                          {% if operation.status != "RD" %}
+                              {% if operation.status == "CD" %}
+                                <a href="{% url 'in_made_status' url=operation.pk %}" type="button" class="btn btn-success" >СОЗДАН</a>
+                              {% elif operation.status == "PD" %}
+                                <a href="{% url 'in_made_status' url=operation.pk %}" type="button" class="btn btn-success" >В РАБОТЕ</a>
+                              {% endif %}
+                          {% else %}
+                                <a href="{% url 'in_made_status' url=operation.pk %}" type="button" class="btn btn-success disabled" >ГОТОВО</a>
+                          {% endif %}
+                      </td>
+                      <td>
+                          {% if operation.status != "RD" %}
+                              {% if operation.status == 'CD' %}
+                                <a href="{% url 'ready_status' url=operation.pk %}" type="button" class="btn btn-primary disabled" >ГОТОВО</a>
+                              {% elif operation.status == 'PD' %}
+                                <a href="{% url 'ready_status' url=operation.pk %}" type="button" class="btn btn-primary" >ГОТОВО</a>
+                              {% endif %}
+
+                          {% else %}
+                            <a href="{% url 'ready_status' url=operation.pk %}" type="button" class="btn btn-primary" >ОТМЕНИТЬ</a>
+                          {% endif %}
+                      </td>
+                    </tr>
+              {% endfor %}
+          </tbody>
+        </table>
+        
+      </div>
+      <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+          <div class="card-columns">
+              {% for operation in operations %}
+              {% if operation.status == "CD" %}
+              <div class="card border-dark">
+              {% elif operation.status == "PD" %}
+              <div class="card border-success">
+              {% else %}
+              <div class="card border-primary">
+              {% endif %}
+              
+                <img class="card-img-top" src="{{ operation.position.detail.draw_png.url }}" alt="Card image cap">
+                <div class="card-body">
+                    <p class="card-text">
+                    #{{ operation.pk }}
+                    
+                    </p>
+                    <h5 class="card-title">{{ operation.position.detail.title }}</h5>
+                  <h5 class="card-title">{{ operation.position.detail.assortment }}
+                      {{ operation.position.detail.material }}
+                      {{ operation.position.detail.thickness_diameter }}мм -
+                      {{ operation.position.quantity }}шт.
+                  </h5>
+                    <p class="card-text" align="center">
+                        
+                    </p>
+                </div>
+                <div class="card-footer bg-transparent border-success">
+                    {% if operation.status != "RD" %}
+                        {% if operation.status == "CD" %}
+                          <a href="{% url 'in_made_status' url=operation.pk %}" type="button" class="btn btn-success col">СОЗДАН</a>
+                        {% elif operation.status == "PD" %}
+                          <a href="{% url 'in_made_status' url=operation.pk %}" type="button" class="btn btn-success col">В РАБОТЕ</a>
+                        {% endif %}
+                    {% else %}
+                          <a href="{% url 'in_made_status' url=operation.pk %}" type="button" class="btn btn-success disabled col">ГОТОВО</a>
+                    {% endif %}
+                    
+                    {% if operation.status != "RD" %}
+                        {% if operation.status == 'CD' %}
+                          <a href="{% url 'ready_status' url=operation.pk %}" type="button" class="btn btn-primary disabled col mt-2">ГОТОВО</a>
+                        {% elif operation.status == 'PD' %}
+                          <a href="{% url 'ready_status' url=operation.pk %}" type="button" class="btn btn-primary col mt-2">ГОТОВО</a>
+                        {% endif %}
+
+                    {% else %}
+                      <a href="{% url 'ready_status' url=operation.pk %}" type="button" class="btn btn-primary col mt-2">ОТМЕНИТЬ</a>
+                    {% endif %}
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+      </div>
+    </div>
+    <script>
+    $(() => {
+    // set the variables
+      let $myTab = $('#nav-tab');
+      let sessionStorageKeyName = 'active-myTab';
+      // check the presence of the stored value in sessionStorage
+      let loadActiveTab = () => sessionStorage[sessionStorageKeyName];
+      // save the id of the active tab in sessionStorage
+      let saveActiveTab = value => sessionStorage[sessionStorageKeyName] = value;
+      // if there is a stored value in sessionStorage
+      if (loadActiveTab()) {
+      	// deactivate all active tabs by default
+        $.each($myTab.find('.nav-link'), (_, item) => $(item).tab('dispose'));
+        // activate tab on id from sessionStorage
+        $myTab.find('#' + loadActiveTab()).tab('show');
+      }
+      // save the id of the selected tab in the sessionStorage
+      $('a[data-toggle="tab"]').on('shown.bs.tab', e => saveActiveTab($(e.currentTarget).attr('id')));
+    });
+    </script>
+    <script>
+      jQuery(document).ready(function($) {
+          $(".clickable-row").click(function() {
+              window.location = $(this).data("href");
+          });
+      });
+    </script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function(event) { 
+            var scrollpos = localStorage.getItem('scrollpos');
+            if (scrollpos) window.scrollTo(0, scrollpos);
+        });
+
+        window.onbeforeunload = function(e) {
+            localStorage.setItem('scrollpos', window.scrollY);
+        };
+    </script>
+    
+</div>
+
+{% endblock %}

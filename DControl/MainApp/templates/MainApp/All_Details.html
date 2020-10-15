@@ -27,7 +27,7 @@
       {% if detail %}
         <tr>
           <th scope="row">{{detail.id}}</th>
-          <td>{{detail.title}}</td>
+          <td class="clickable-row" data-href="{% url 'detail_view' url=detail.pk %}">{{detail.title}}</td>
           <td>
             <a href="{{detail.draw_pdf.url}}">
               <img  src="{{detail.draw_png.url}}" alt="..." width="200">
@@ -46,4 +46,11 @@
     </tbody>
   </table>
 </div>
+<script>
+    jQuery(document).ready(function($) {
+        $(".clickable-row").click(function() {
+            window.location = $(this).data("href");
+        });
+    });
+</script>
 {% endblock %}

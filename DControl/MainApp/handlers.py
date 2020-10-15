@@ -8,7 +8,7 @@ from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
 from pathlib import Path
 from django.conf import settings
-from .models import Position, Detail, Order
+from .models import Position, Detail, Order, Fields_Position, Operation
 
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -16,7 +16,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def qr_generator(title):
     host = settings.ALLOWED_HOSTS[0]
-    detail_view_url = 'http://' + str(host) + '/all/Position/' + title
+    detail_view_url = 'http://' + str(host) + ':9997' + '/all/Position/' + title
     #detail_view_url = 'http://127.0.0.1:8000/all/Position/' + title
     text = str(title)
     img = qrcode.make(detail_view_url)
@@ -26,7 +26,7 @@ def qr_generator(title):
         
         # filename convert
         img_name = 'media/QR_CODE/' + text + '.png'
-        print(img_path, '>' , img_name)
+        print(img_path, '>', img_name)
         
     except:
         print('Error save')
@@ -45,11 +45,11 @@ def create_pdf(order):
     positions = Position.objects.filter(order=order)
     f_n = (str(order.title) + " #" + str(order.pk))
     file_name = os.path.join(BASE_DIR, 'media/QR_CODE_LIST/') + '{}.pdf'.format(f_n)
-    
+
     # filename convert
     new_file_name = 'media/QR_CODE_LIST/' + '{}.pdf'.format(f_n)
     print(file_name, '>', new_file_name)
-    
+
     documentTitle = '{} #{}'.format(order.title, order.pk)
     pdf = canvas.Canvas(file_name)
     pdfmetrics.registerFont(TTFont('FreeSans', os.path.join(BASE_DIR, 'MainApp/FreeSans.ttf')))
@@ -60,25 +60,34 @@ def create_pdf(order):
     order = str(order.title)
 
     def crete_one_pos(x, y, detail_title, position_code, position_quantity, order, img):
-        pdf.rect(x, y, 63.33 * masshtab, 31.5 * masshtab, stroke=1, fill=0)
-        canvas.Canvas.drawImage(pdf, img, x + 34.83 * masshtab, y + 3 * masshtab, width=25.5 * masshtab,
-                                height=25.5 * masshtab)
-        canvas.Canvas.setFont(pdf, 'FreeSans', 4)
-        pdf.drawString(x + 3 * masshtab, y + 3 * masshtab, detail_title)
-        canvas.Canvas.setFont(pdf, 'FreeSans', 4)
-        pdf.drawString(x + 3 * masshtab, y + 9.375 * masshtab, position_code)
-        canvas.Canvas.setFont(pdf, 'FreeSans', 12)
-        pdf.drawString(x + 3 * masshtab, y + 15.75 * masshtab, position_quantity)
-        canvas.Canvas.setFont(pdf, 'FreeSans', 4)
-        pdf.drawString(x + 3 * masshtab, y + 22.125 * masshtab, order)
-        pdf.drawString(x + 3 * masshtab, y + 28.5 * masshtab, 'НАЗВАНИЕ ЗАКАЗА:')
+        pdf.rect(x, y, 44 * masshtab, 20 * masshtab, stroke=1, fill=0)
+        canvas.Canvas.drawImage(pdf, img, x + 21.3 * masshtab, y - 1.5 * masshtab, width=23.2 * masshtab,
+                                height=23.2 * masshtab)
+        canvas.Canvas.setFont(pdf, 'FreeSans', 8)
+        if len(detail_title) > 15:
+            pdf.drawString(x + 1 * masshtab, y + 1 * masshtab, detail_title[15:30])
+            pdf.drawString(x + 1 * masshtab, y + 4 * masshtab, detail_title[0:15])
+        else:
+            pdf.drawString(x + 1 * masshtab, y + 3 * masshtab, detail_title)
+        canvas.Canvas.setFont(pdf, 'FreeSans', 6)
+        pdf.drawString(x + 1 * masshtab, y + 8 * masshtab, 'НАЗВАНИЕ ДЕТАЛИ:')
+        canvas.Canvas.setFont(pdf, 'FreeSans', 6)
+        pdf.drawString(x + 1 * masshtab, y + 10.5 * masshtab, str("КОЛ-ВО: " + position_quantity))  # +
+        canvas.Canvas.setFont(pdf, 'FreeSans', 6)
+        if len(order) > 16:
+            pdf.drawString(x + 1 * masshtab, y + 15 * masshtab, order[0:18])
+            pdf.drawString(x + 1 * masshtab, y + 13 * masshtab, order[18:36])
+        else:
+            pdf.drawString(x + 1 * masshtab, y + 14 * masshtab, order)
+        canvas.Canvas.setFont(pdf, 'FreeSans', 6)
+        pdf.drawString(x + 1 * masshtab, y + 17.5 * masshtab, 'НАЗВАНИЕ ЗАКАЗА:')  # +
 
     i = 0
 
-    y0 = 5 * masshtab
-    x0 = 5 * masshtab
-    dx = 68.33 * masshtab
-    dy = 36.5 * masshtab
+    y0 = 15
+    x0 = 15
+    dx = 52.5 * masshtab
+    dy = 29.7 * masshtab
 
     for position in positions:
         i += 1
@@ -97,17 +106,17 @@ def create_pdf(order):
         position_quantity = str(position.quantity)
         order_title = str(order.title)
         img = str(position.qr_code).replace('\\', '/')
-        if h % 24 == 0 and h != 0:
+        if h % 40 == 0 and h != 0:
             k = 0
             g = 0
             t = 0
             canvas.Canvas.showPage(pdf)
             pdfmetrics.registerFont(TTFont('FreeSans', os.path.join(BASE_DIR, 'MainApp/FreeSans.ttf')))
             canvas.Canvas.setFont(pdf, 'FreeSans', 8)
-        if k > 2:
+        if k > 3:
             k = 0
         x = x0 + dx * k
-        if t % 3 == 0 and t != 0:
+        if t % 4 == 0 and t != 0:
             g += 1
         y = y0 + dy * g
         k += 1
@@ -116,8 +125,6 @@ def create_pdf(order):
         crete_one_pos(x, y, detail_title, position_code, position_quantity, order, img)
 
     pdf.save()
-    
-    
 
     return new_file_name
 

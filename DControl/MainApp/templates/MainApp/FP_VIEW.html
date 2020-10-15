@@ -1,0 +1,230 @@
+{% extends "MainApp/base.html" %}
+{% block title %}DControl{% endblock %}
+{% block content %}
+{% load static %}
+{% load crispy_forms_tags %}
+<style>
+.table          { overflow-y: auto; height: 100px; }
+.table thead th { position: sticky; top: 0; }
+
+table.table-bordered > tbody > tr > td{
+  border:2px solid black;
+}
+</style>
+<div class="container">
+    {% if messages %}
+    <ul class="messages mt-3">
+        {% for message in messages %}
+            <li class="list-group-item list-group-item-danger">{{ message }}</li>
+        {% endfor %}
+    </ul>
+    {% endif %}
+    <section class="jumbotron  mt-3">
+        <div class="container">
+            <div class="text-center">
+                <h1 class="jumbotron-heading">DControl - Заказ № {{order.pk}}</h1>
+            </div>
+
+                <div class="d-flex justify-content-between">
+                    <div>
+                        <p class="lead text-muted">Название заказа - {{order.title}}</p>
+                        <p class="lead text-muted">Автор заказа - {{order.author}}</p>
+                        <p class="lead text-muted">Проект - {{order.project.title}}</p>
+                        <p class="lead text-muted">Дата готовности - {{order.readiness}}</p>
+                    </div>
+                    <div align="center">
+                        <a href="{{order.qr_code_list.url|slice:'6:'}}" type="button" class="btn btn-outline-info col">ОТКРЫТЬ QR-CODE PDF</a><br>
+                        <a href="{{order.qr_code_list.url|slice:'6:'}}" type="button" class="btn btn-outline-danger col mt-2" download>СКАЧАТЬ QR-CODE PDF</a><br>
+
+                        <button type="button" class="btn btn btn-outline-warning col mt-2" data-toggle="modal" data-target="#exampleModalCenter">
+                          ЗАГРУЗИТЬ ЧЕРТЕЖИ PDF
+                        </button><br>
+                        <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+                          <div class="modal-dialog modal-dialog-centered" role="document">
+                            <div class="modal-content">
+                              <div class="modal-header">
+                                <h5 class="modal-title" id="exampleModalCenterTitle">Загрузка чертежей для заказа {{order.title}} #{{order.pk}}</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                  <span aria-hidden="true">&times;</span>
+                                </button>
+                              </div>
+                            <form method="POST" enctype="multipart/form-data">
+                              <div class="modal-body">
+                                    {% csrf_token %}
+                                    <div>
+                                        {{form.archive}}
+                                    </div>
+                                    <div>
+                                        {{form.flag}}
+                                        Присвоить чертежи деталям?(<small>Нет по умолчанию</small>)
+                                    </div>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Отмена</button>
+                                <button type="submit" class="btn btn-primary">Загрузить</button>
+                              </div>
+                            </form>
+                            </div>
+                          </div>
+                        </div>
+
+                        {% if order.archive_ready %}
+                            <a href="{{order.draw_archive.url|slice:'6:'}}" type="button" class="btn btn-outline-success col mt-2">СКАЧАТЬ PDF АРХИВ ЧЕРТЕЖЕЙ</a>
+                        {% else %}
+                            <a href="{% url 'archive_pdf_former' url=order.pk %}" type="button" class="btn btn-outline-secondary col mt-2">СФОРМИРОВАТЬ PDF АРХИВ ЧЕРТЕЖЕЙ</a>
+                        {% endif %}
+                        {% if user.profile.status == 'C' and user.is_authenticated %}
+                            <a href="{% url 'add_pisition' url=order.pk %}" class="btn btn-outline-success col mt-2">ADD POSITION</a>
+                        {% endif %}
+                    </div>
+                </div>
+        </div>
+    </section>
+    <hr>
+    <small>
+        ОЗ - Опытынй завод; НИИЛР - НИИ Лазерная Резка; АС - Альянс Сталь; CNCMW - CNC MetalWork; ПК1 - Покрытие №1; ПК2 - Покрытие №2; ДР - Другой; МХ - Место хранения.
+    </small>
+    <small>
+        <span class="badge badge-info">Операция создана</span><span class="badge badge-warning">Деталь в работе</span><span class="badge badge-success">Деталь готова</span>
+    </small>
+    <table class="table table-bordered col mt-2" style="font-size: 0.8em;">
+        <thead class="thead-dark">
+            <tr align="center">
+            <th scope="col">#</th>
+            <th scope="col">НАИМЕНОВНИЕ ДЕТАЛИ</th>
+            <th scope="col">КОЛИЧЕСТВО</th>
+            <th scope="col">МАТЕРИАЛ</th>
+            <th scope="col">СОРТАМЕНТ</th>
+            <th scope="col">ВЕЛИЧИНА</th>
+            <th scope="col">ОЗ</th>
+            <th scope="col">НИИЛРа</th>
+            <th scope="col">АС</th>
+            <th scope="col">CNCMW</th>
+            <th scope="col">ПК1</th>
+            <th scope="col">ПК2</th>
+            <th scope="col">ДР</th>
+            <th scope="col">МХ</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for fp in fps %}
+                {% for key1,item1 in ready_positions.items %}
+                    {% if key1 == fp.position.detail.title %}
+                        {% if item1 == 0 %}
+                            <tr class="table-success" align="center">
+                        {% else %}
+                            <tr align="center">
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                <th scope="row" >{{fp.position.id}}</th>
+                <td class="col" >
+                  <a href="{% url 'position_view' code=fp.position.code %}">{{fp.position.detail.title}}</a>
+                </td>
+                <td class="col">{{fp.position.quantity}}</td>
+                <td class="col">{{fp.position.detail.material}}</td>
+                <td class="col">{{fp.position.detail.assortment}}</td>
+                <td class="col">{{fp.position.detail.thickness_diameter}}</td>
+                <td class="col">
+                    {% if fp.operation_oz %}
+                        {% if fp.operation_oz.status == 'CD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_oz.pk %}" class="badge badge-pill badge-info">{{fp.operation_oz.remaining_parts}}</a>
+                        {% elif fp.operation_oz.status == 'PD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_oz.pk %}" class="badge badge-pill badge-warning">{{fp.operation_oz.remaining_parts}}</a>
+                        {% elif fp.operation_oz.status == 'RD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_oz.pk %}" class="badge badge-pill badge-success">{{fp.operation_oz.remaining_parts}}</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td class="col" >
+                    {% if fp.operation_niilr %}
+                        {% if fp.operation_niilr.status == 'CD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_niilr.pk %}" class="badge badge-pill badge-info">{{fp.operation_niilr.remaining_parts}}</a>
+                        {% elif fp.operation_niilr.status == 'PD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_niilr.pk %}" class="badge badge-pill badge-warning">{{fp.operation_niilr.remaining_parts}}</a>
+                        {% elif fp.operation_niilr.status == 'RD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_niilr.pk %}" class="badge badge-pill badge-success">{{fp.operation_niilr.remaining_parts}}</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td class="col">
+                    {% if fp.operation_alianse %}
+                        {% if fp.operation_alianse.status == 'CD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_alianse.pk %}" class="badge badge-pill badge-info">{{fp.operation_alianse.remaining_parts}}</a>
+                        {% elif fp.operation_alianse.status == 'PD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_alianse.pk %}" class="badge badge-pill badge-warning">{{fp.operation_alianse.remaining_parts}}</a>
+                        {% elif fp.operation_alianse.status == 'RD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_alianse.pk %}" class="badge badge-pill badge-success">{{fp.operation_alianse.remaining_parts}}</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td class="col">
+                    {% if fp.operation_cncmw %}
+                        {% if fp.operation_cncmw.status == 'CD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_cncmw.pk %}" class="badge badge-pill badge-info">{{fp.operation_cncmw.remaining_parts}}</a>
+                        {% elif fp.operation_cncmw.status == 'PD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_cncmw.pk %}" class="badge badge-pill badge-warning">{{fp.operation_cncmw.remaining_parts}}</a>
+                        {% elif fp.operation_cncmw.status == 'RD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_cncmw.pk %}" class="badge badge-pill badge-success">{{fp.operation_cncmw.remaining_parts}}</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td class="col">
+                    {% if fp.operation_pk1 %}
+                        {% if fp.operation_pk1.status == 'CD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_pk1.pk %}" class="badge badge-pill badge-info">{{fp.operation_pk1.remaining_parts}}</a>
+                        {% elif fp.operation_pk1.status == 'PD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_pk1.pk %}" class="badge badge-pill badge-warning">{{fp.operation_pk1.remaining_parts}}</a>
+                        {% elif fp.operation_pk1.status == 'RD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_pk1.pk %}" class="badge badge-pill badge-success">{{fp.operation_pk1.remaining_parts}}</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td class="col">
+                    {% if fp.operation_pk2 %}
+                        {% if fp.operation_pk2.status == 'CD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_pk2.pk %}" class="badge badge-pill badge-info">{{fp.operation_pk2.remaining_parts}}</a>
+                        {% elif fp.operation_pk2.status == 'PD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_pk2.pk %}" class="badge badge-pill badge-warning">{{fp.operation_pk2.remaining_parts}}</a>
+                        {% elif fp.operation_pk2.status == 'RD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_pk2.pk %}" class="badge badge-pill badge-success">{{fp.operation_pk2.remaining_parts}}</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td class="col">
+                    {% if fp.operation_dr %}
+                        {% if fp.operation_dr.status == 'CD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_dr.pk %}" class="badge badge-pill badge-info">{{fp.operation_dr.remaining_parts}}</a>
+                        {% elif fp.operation_dr.status == 'PD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_dr.pk %}" class="badge badge-pill badge-warning">{{fp.operation_dr.remaining_parts}}</a>
+                        {% elif fp.operation_dr.status == 'RD' %}
+                            <a href="{% url 'order_operation_change_status' url=fp.operation_dr.pk %}" class="badge badge-pill badge-success">{{fp.operation_dr.remaining_parts}}</a>
+                        {% endif %}
+                    {% endif %}
+                </td>
+                <td class="col">
+                    {{fp.position.stockage_code}}
+                </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+    </table>
+</div>
+<script>
+    var $th = $('.tableFixHead').find('thead th')
+    $('.tableFixHead').on('scroll', function() {
+      $th.css('transform', 'translateY('+ this.scrollTop +'px)');
+    });
+</script>
+<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+        var scrollpos = localStorage.getItem('scrollpos');
+        if (scrollpos) window.scrollTo(0, scrollpos);
+    });
+
+    window.onbeforeunload = function(e) {
+        localStorage.setItem('scrollpos', window.scrollY);
+    };
+</script>
+{% endblock %}

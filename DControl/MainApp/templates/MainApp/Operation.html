@@ -11,6 +11,7 @@
         {% endfor %}
     </ul>
     {% endif %}
+    <a type="button" href="{% url 'position_view' code=operation.position.code %}" class="btn btn-secondary btn-lg btn-block mt-3"><<<НАЗАД К ДЕТАЛИ</a>
     <section class="jumbotron  mt-3">
         <div class="container">
             <div class="text-center">
@@ -42,6 +43,7 @@
                         <li class="list-group-item col-4">ДЕТАЛЬ</li>
                         <a href="{% url 'position_view' code=operation.position.code %}" class="list-group-item list-group-item-action list-group-item-success col-8"><h6>{{operation.position.detail.title}}</h6></a>
                     </ul>
+                    <a href="{% url 'operation_delete' pk=operation.pk %}" class="btn btn-outline-danger col mt-3">DELETE OPERATION</a>
                 </div>
             </div>
 

@@ -11,6 +11,7 @@
         {% endfor %}
     </ul>
     {% endif %}
+	<a type="button" href="{% url 'order_view' url=order.pk %}" class="btn btn-secondary btn-lg btn-block mt-3"><<<НАЗАД К ЗАКАЗУ</a>
     <section class="jumbotron  mt-3">
         <div class="container">
             <div class="text-center">
@@ -27,6 +28,11 @@
                     <p class="lead text-muted">Автор заказа - {{order.author}}</p>
                     <p class="lead text-muted">Проект - {{order.project.title}}</p>
                     <p class="lead text-muted">Дата готовности - {{order.readiness}}</p>
+                    {% if user.profile.status == 'C' and user.is_authenticated %}
+                        <a href="{% url 'position_update' pk=position.pk %}" class="btn btn-outline-success col mt-3">UPDATE POSITION</a>
+                        <a href="{% url 'detail_update' pk=position.detail.pk %}" class="btn btn-outline-info col mt-3">UPDATE DETAIL</a>
+                        <a href="{% url 'operation_add' code=position.code %}" class="btn btn-outline-primary col mt-3">ADD OPERATION</a>
+                    {% endif %}
                 </div>
                 <div class="text-center">
                     <img src="{{position.qr_code.url|slice:'6:'}}" width="250"><br>
@@ -39,7 +45,6 @@
                     <button type="button" class="btn btn-outline-warning col" data-toggle="modal" data-target="#exampleModal">
                       СМЕНИТЬ МЕСТОРАСПОЛОЖЕНИЕ
                     </button>
-                    <a href="{% url 'position_draw_change' code=position.code %}" class="btn btn-outline-success col mt-3">CHANGE DRAW</a>
 
                     <!-- Modal -->
                     <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
@@ -81,7 +86,7 @@
     </section>
     <ul class="list-group list-group-horizontal mt-4">
         {% for operation in operations %}
-            {% if operation.remaining_parts == 0 %}
+            {% if operation.status == "RD" %}
                 <a href="{% url 'operation_view' url=operation.pk %}" class="list-group-item list-group-item-action
                  list-group-item-primary d-flex justify-content-between align-items-center col mb-4 disabled">
                     {{operation.manufactured.title}}

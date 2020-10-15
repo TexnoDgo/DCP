@@ -1,0 +1,22 @@
+{% extends "MainApp/base.html" %}
+{% block title %}DControl - Удаление операции{% endblock %}
+{% block content %}
+{% load static %}
+{% load crispy_forms_tags %}
+
+<div class="container">
+    <section class="jumbotron text-center mt-3">
+        <div class="container">
+          <h1 class="jumbotron-heading">DControl - Удаление операции</h1>
+          <p class="lead text-muted">Для позиции детали {{detail.title}}</p>
+          <p class="lead text-muted">Заказа {{order.title}}</p>
+        </div>
+    </section>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+        <button class="btn btn-primary col" type="submit">Да, Удалить</button>
+    </form>
+</div>
+
+{% endblock %}

@@ -2,20 +2,25 @@ import os
 from openpyxl import load_workbook
 import urllib.request
 
+from django.views.generic import ListView, View, DetailView, UpdateView, DeleteView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+
 from django.utils.crypto import get_random_string
 from django.contrib import messages
 from django.conf import settings
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import login, authenticate
 
 
-from .models import (Material, Assortment, Detail,
+from .models import (Assortment, Detail,
                      Project, Order, Position, City,
-                     Manufactured, Operation, Transaction, StockageCode, SystemFile)
-from .forms import (ProjectCreateForm, MaterialCreateForm, AssortmentCreateForm,
+                     Manufactured, Operation, Transaction, StockageCode, SystemFile, Fields_Position, blog)
+from .forms import (ProjectCreateForm, AssortmentCreateForm,
                     DetailCreateForm, OrderCreateForm, OrderSuperCreateForm, OrderDRAWUploadForm,
                     PositionCreateForm, CityCreateForm, ManufacturedCreateForm, OperationCreateForm,
-                    TransactionCreateForm, PositionStorageForm, PositionSearch, PositionDrawAdd)
+                    TransactionCreateForm, PositionStorageForm, PositionSearch, PositionDrawAdd,
+                    SignUpForm, PasitionAddForm, blog_create_form)
 from .handlers import convert_pdf_to_bnp, qr_generator, create_pdf, detail_check, ex_archive, pdf_archive_form
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -23,6 +28,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def index(request):
     details = Detail.objects.all()
+    manufactureds = Manufactured.objects.all()
     detail_list = []
     for detail in details:
       detail_list.append(detail.title)
@@ -59,6 +65,7 @@ def index(request):
         'all_pos': positions,
         'text': text,
         'detail_list': detail_list,
+        'manufactureds': manufactureds,
     }
     return render(request, 'MainApp/HomePage.html', context)
 
@@ -100,13 +107,52 @@ def detail_create(request):
 
 
 @login_required
+def detail_view(request, url):
+    detail = Detail.objects.get(pk=url)
+    
+    context = {
+        'detail': detail,
+    }
+    
+    return render(request, 'MainApp/DetailView.html', context)
+
+
+@login_required
 def details_all(request):
     all_detail = Detail.objects.all()
+    manufactureds = Manufactured.objects.all()
 
     context = {
         'all_detail': all_detail,
+        'manufactureds': manufactureds,
     }
     return render(request, 'MainApp/All_Details.html', context)
+
+
+class DetailUpdate(UpdateView):
+
+    model = Detail
+    
+    def get_context_data(self, **kwargs):
+        context = super(DetailUpdate, self).get_context_data(**kwargs)
+        # a = self.object.id
+        
+        return context
+    
+    fields = ['title', 'draw_pdf', 'material', 'assortment', 'thickness_diameter']
+    
+    def form_valid(self, form):
+        form.instance.author = self.request.user
+        detail = form.save(commit=False)
+        form.save()
+        pdf_file_name = str(detail.draw_pdf)
+        png_file_name = '{}{}'.format(pdf_file_name[9:-3], 'png')
+        png_full_path = os.path.join(BASE_DIR, 'media/PNG_COVER/') + png_file_name
+        convert_pdf_to_bnp(detail.draw_pdf.path, png_full_path)
+        png_path_name = 'PNG_COVER/' + png_file_name
+        detail.draw_png = png_path_name
+        detail.save()
+        return redirect('orders_all')
 
 
 @login_required
@@ -173,7 +219,8 @@ def order_super_create(request):
                     ex_part = detail_check(detail_title)
                     print(ex_part)
                     # --------------------Создание детали-----------------------
-                    ex_material = Material.objects.get(title=detail_material)
+                    # ex_material = Material.objects.get(title=detail_material)
+                    ex_material = detail_material
                     ex_assortment = Assortment.objects.get(title=detail_assortment)
                     ex_stockage_code = StockageCode.objects.get(title='Без расположения')
                     code = get_random_string(length=32)
@@ -188,14 +235,16 @@ def order_super_create(request):
                         position = Position(order=super_order, detail=detail, quantity=position_quantity,
                                             code=code, qr_code=qr_code, stockage_code=ex_stockage_code)
                         # --------------------Создание позиции-----------------------
+                        position.save()
                     elif ex_part:
                         detail = Detail.objects.get(title=detail_title)
                         position = Position(order=super_order, detail=detail, quantity=position_quantity,
                                             code=code, qr_code=qr_code, stockage_code=ex_stockage_code)
+                        position.save()
                     else:
                         print('IF error')
 
-                    position.save()
+                   
 
                     # ----------------------Информация об операциях-----------------
                     for a in range(1, 8):
@@ -206,6 +255,78 @@ def order_super_create(request):
                             ex_opertion = Operation(manufactured=ex_manufactured, position=position,
                                                     remaining_parts=position_quantity)
                             ex_opertion.save()
+                            '''if ex_opertion.manufactured.title == 'Опытынй завод':
+                                fp.operation_oz = ex_opertion
+                            elif ex_opertion.manufactured.title == 'НИИ Лазерная Резка':
+                                fp.operation_niilr = ex_opertion
+                            elif ex_opertion.manufactured.title == 'Альянс Сталь':
+                                fp.operation_alianse = ex_opertion
+                            elif ex_opertion.manufactured.title == 'CNC MetalWork':
+                                fp.operation_cncmw = ex_opertion
+                            elif ex_opertion.manufactured.title == 'Покрытие №1':
+                                fp.operation_pk1 = ex_opertion
+                            elif ex_opertion.manufactured.title == 'Покрытие №2':
+                                fp.operation_pk2 = ex_opertion
+                            elif ex_opertion.manufactured.title == 'Другой':
+                                fp.operation_dr = ex_opertion'''
+                            if ex_opertion.manufactured.title == 'Опытынй завод':
+                                try:
+                                    fp = Fields_Position.objects.get(position=position)
+                                    fp.operation_oz = ex_opertion
+                                    fp.save()
+                                except:
+                                    fp = Fields_Position(position=position, operation_oz=ex_opertion)
+                                    fp.save()
+                            elif ex_opertion.manufactured.title == 'НИИ Лазерная Резка':
+                                try:
+                                    fp = Fields_Position.objects.get(position=position)
+                                    fp.operation_niilr = ex_opertion
+                                    fp.save()
+                                except:
+                                    fp = Fields_Position(position=position, operation_niilr=ex_opertion)
+                                    fp.save()
+                            elif ex_opertion.manufactured.title == 'Альянс Сталь':
+                                try:
+                                    fp = Fields_Position.objects.get(position=position)
+                                    fp.operation_alianse = ex_opertion
+                                    fp.save()
+                                except:
+                                    fp = Fields_Position(position=position, operation_alianse=ex_opertion)
+                                    fp.save()
+                            elif ex_opertion.manufactured.title == 'CNC MetalWork':
+                                try:
+                                    fp = Fields_Position.objects.get(position=position)
+                                    fp.operation_cncmw = ex_opertion
+                                    fp.save()
+                                except:
+                                    fp = Fields_Position(position=position, operation_cncmw=ex_opertion)
+                                    fp.save()
+                            elif ex_opertion.manufactured.title == 'Покрытие №1':
+                                try:
+                                    fp = Fields_Position.objects.get(position=position)
+                                    fp.operation_pk1 = ex_opertion
+                                    fp.save()
+                                except:
+                                    fp = Fields_Position(position=position, operation_pk1=ex_opertion)
+                                    fp.save()
+                            elif ex_opertion.manufactured.title == 'Покрытие №2':
+                                try:
+                                    fp = Fields_Position.objects.get(position=position)
+                                    fp.operation_pk2 = ex_opertion
+                                    fp.save()
+                                except:
+                                    fp = Fields_Position(position=position, operation_pk2=ex_opertion)
+                                    fp.save()
+                            elif ex_opertion.manufactured.title == 'Другой':
+                                try:
+                                    fp = Fields_Position.objects.get(position=position)
+                                    fp.operation_dr = ex_opertion
+                                    fp.save()
+                                except:
+                                    fp = Fields_Position(position=position, operation_dr=ex_opertion)
+                                    fp.save()
+                            fp.save()
+                            
                     # ----------------------Информация об операциях-----------------
                 else:
                     i = 0
@@ -227,7 +348,9 @@ def order_super_create(request):
 @login_required
 def orders_all(request):
 
-    all_orders = Order.objects.all()
+    all_orders = Order.objects.all().order_by('-pk')
+    manufactureds = Manufactured.objects.all()
+    positions = Position.objects.all()
 
     '''orders = {}
     for order in all_orders:
@@ -246,6 +369,8 @@ def orders_all(request):
 
     context = {
         'all_orders': all_orders,
+        'manufactureds': manufactureds,
+        'positions': positions,
     }
 
     return render(request, 'MainApp/All_Orders.html', context)
@@ -257,6 +382,7 @@ def order_view(request, url):
     positions = Position.objects.filter(order=order)
     details = Detail.objects.all()
     operations = Operation.objects.all()
+    manufactureds = Manufactured.objects.all()
 
     ready_positions = {}
 
@@ -292,9 +418,69 @@ def order_view(request, url):
         'operations': operations,
         'form': form,
         'ready_positions': ready_positions,
+        'manufactureds': manufactureds,
     }
 
     return render(request, 'MainApp/Order.html', context)
+
+
+@login_required
+def add_pisition(request, url):
+    order = Order.objects.get(pk=url)
+    
+    if request.method == 'POST':
+    
+        form = PasitionAddForm(request.POST, request.FILES)
+        
+        if form.is_valid():
+            detail_title = form.cleaned_data.get('detail_title', None)
+            quantity = form.cleaned_data.get('quantity', None)
+            #draw_pdf = form.cleaned_data.get('draw_pdf', None)
+            material = form.cleaned_data.get('material', None)
+            assortment = form.cleaned_data.get('assortment', None)
+            thickness_diameter = form.cleaned_data.get('thickness_diameter', None)
+            
+            ex_part = detail_check(detail_title)
+            code = get_random_string(length=32)
+            qr_code = qr_generator(code)
+            ex_stockage_code = StockageCode.objects.get(title='Без расположения')
+            try:
+                ex_assortmaent = Assortment.objects.get(title=assortment)
+            except:
+                messages.success(request, f'ASSORTMENT ERROR!')
+            
+            if not ex_part:
+            
+                detail = Detail(title=detail_title, author=request.user, material=material,
+                                assortment=ex_assortmaent, thickness_diameter=thickness_diameter)
+                detail.save()
+                
+                position = Position(order=order, detail=detail, quantity=quantity,
+                                    code=code, qr_code=qr_code, stockage_code=ex_stockage_code)
+
+            elif ex_part:
+                detail = Detail.objects.get(title=detail_title)
+                
+                position = Position(order=order, detail=detail, quantity=quantity,
+                                    code=code, qr_code=qr_code, stockage_code=ex_stockage_code)
+            else:
+                print('IF error')
+
+            position.save()
+            
+            fp = Fields_Position(position=position)
+            fp.save()
+
+    else:
+        form = PasitionAddForm()
+        messages.success(request, f'FORM DIDNT VALID!')
+        
+    
+    context = {
+        'order': order,
+        'form': form,
+    }
+    return render(request, 'MainApp/PositionADD.html', context)
 
 
 @login_required
@@ -305,6 +491,7 @@ def position_view(request, code):
     detail = Detail.objects.get(pk=position.detail.pk)
     maps = SystemFile.objects.get(title='maps')
     stockage = StockageCode.objects.all()
+    manufactureds = Manufactured.objects.all()
 
     if request.method == 'POST':
 
@@ -334,9 +521,30 @@ def position_view(request, code):
         'form': form,
         'maps': maps,
         'stockage': stockage,
+        'manufactureds': manufactureds,
     }
 
     return render(request, 'MainApp/Position.html', context)
+
+
+class PositionUpdate(UpdateView):
+
+    model = Position
+    
+    
+    def get_context_data(self, **kwargs):
+        context = super(PositionUpdate, self).get_context_data(**kwargs)
+        # a = self.object.id
+        
+        return context
+    
+    fields = ['order', 'detail', 'quantity', 'stockage_code']
+    
+    def form_valid(self, form):
+        position = form.save(commit=False)
+        position.save()
+        code = position.code
+        return redirect('position_view', code)
 
 
 @login_required
@@ -351,8 +559,8 @@ def position_draw_change(request, code):
         
         if form.is_valid():
             draw = form.cleaned_data.get('draw', None)
-            print(draw)
-            print('YES!')
+            detail.draw_pdf = draw
+            detail.save()
             pdf_file_name = str(detail.draw_pdf)
             print(pdf_file_name)  # Delete
             png_file_name = '{}{}'.format(pdf_file_name[9:-3], 'png')
@@ -387,6 +595,8 @@ def operation_view(request, url):
     transactions = Transaction.objects.filter(operation=operation)
 
     difference = int(operation.position.quantity) - int(operation.remaining_parts)
+    
+    manufactureds = Manufactured.objects.all()
 
     if request.method == 'POST':
 
@@ -422,8 +632,97 @@ def operation_view(request, url):
         'form': form,
         'difference': difference,
         'transactions': transactions,
+        'manufactureds': manufactureds,
     }
     return render(request, 'MainApp/Operation.html', context)
+
+
+def operation_add(request, code):
+    position = Position.objects.get(code=code)
+    fp = Fields_Position.objects.get(position=position)
+    
+    if request.method == 'POST':
+        form = OperationCreateForm(request.POST)
+        print('post')
+        
+        if form.is_valid():
+            print('valid')
+            operation = form.save(commit=False)
+            operation.title = "DEFAULT"
+            operation.status = "CD"
+            operation.position = position
+            operation.remaining_parts = position.quantity
+            operation.save()
+            
+            if operation.manufactured.title == 'Опытынй завод':
+                fp.operation_oz = operation
+            elif operation.manufactured.title == 'НИИ Лазерная Резка':
+                fp.operation_niilr = operation
+            elif operation.manufactured.title == 'Альянс Сталь':
+                fp.operation_alianse = operation
+            elif operation.manufactured.title == 'CNC MetalWork':
+                fp.operation_cncmw = operation
+            elif operation.manufactured.title == 'Покрытие №1':
+                fp.operation_pk1 = operation
+            elif operation.manufactured.title == 'Покрытие №2':
+                fp.operation_pk2 = operation
+            elif operation.manufactured.title == 'Другой':
+                fp.operation_dr = operation
+            fp.save()
+            
+            messages.success(request, f'Operation ADD!')
+            return redirect('position_view', code)
+        
+    else:
+        form = OperationCreateForm()
+        print('else')
+        
+    context = {
+        'form': form,
+        'position': position,
+    }
+    
+    return render(request, 'MainApp/OperationADD.html', context)
+
+
+class OperationDelete(DeleteView):
+
+    model = Operation
+
+    success_url = '/all/AllOrders'
+
+    def test_func(self):
+        operation = self.get_object()
+        if self.request.user == operation.position.order.author:
+            return True
+        return False
+
+    def get_context_data(self, **kwargs):
+        context = super(OperationDelete, self).get_context_data(**kwargs)
+        a = self.object.id
+        operation = self.get_object()
+        position = Position.objects.get(operation=operation)
+        fp = Fields_Position.objects.get(position=position) 
+        
+        if operation.manufactured.title == 'Опытынй завод':
+            fp.operation_oz = None
+        elif operation.manufactured.title == 'НИИ Лазерная Резка':
+            fp.operation_niilr = None
+        elif operation.manufactured.title == 'Альянс Сталь':
+            fp.operation_alianse = None
+        elif operation.manufactured.title == 'CNC MetalWork':
+            fp.operation_cncmw = None
+        elif operation.manufactured.title == 'Покрытие №1':
+            fp.operation_pk1 = None
+        elif operation.manufactured.title == 'Покрытие №2':
+            fp.operation_pk2 = None
+        elif operation.manufactured.title == 'Другой':
+            fp.operation_dr = None
+
+        fp.save()
+        
+        context['detail'] = operation.position.detail
+        return context
 
 
 def crete_order_qr_code_list(request, url):
@@ -442,3 +741,221 @@ def archive_pdf_former(request, url):
                          f'Архив с чертежами отсутствует!.')
     # ADD MESSAGE
     return redirect(request.META['HTTP_REFERER'])
+
+@login_required
+def manufactured_acc(request, url):
+    manufactureds = Manufactured.objects.all()
+    manufactured = Manufactured.objects.get(pk=url)
+    operations = Operation.objects.filter(manufactured=manufactured).order_by('-pk')
+    positions = Position.objects.all().order_by('-pk')
+
+    context = {
+        'manufactureds': manufactureds,
+        'manufactured': manufactured,
+        'operations': operations,
+        'positions': positions,
+    }
+
+    return render(request, 'MainApp/Manufactured.html', context)
+    
+    
+@login_required
+def in_made_status(request, url):
+    operation = Operation.objects.get(pk=url)
+    if operation.status == 'CD':
+        operation.status = 'PD'
+    elif operation.status == 'PD':
+        operation.status = 'CD'
+    operation.save()
+    return redirect(request.META['HTTP_REFERER'])
+
+
+@login_required
+def ready_status(request, url):
+    operation = Operation.objects.get(pk=url)
+    if operation.status == 'PD':
+        operation.status = 'RD'
+    elif operation.status == 'RD':
+        operation.status = 'PD'
+    operation.save()
+    return redirect(request.META['HTTP_REFERER'])
+
+@login_required
+def order_operation_change_status(request, url):
+    operation = Operation.objects.get(pk=url)
+    if operation.status == 'CD':
+        operation.status = 'PD'
+    elif operation.status == 'PD':
+        operation.status = 'RD'
+        operation.remaining_parts = 0
+    elif operation.status == 'RD':
+        operation.status = 'PD'
+        operation.remaining_parts = operation.position.quantity
+    operation.save()
+    return redirect(request.META['HTTP_REFERER'])
+
+def signup(request):
+    if request.method == 'POST':
+        form = SignUpForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            user.refresh_from_db()  # load the profile instance created by the signal
+            user.profile.birth_date = form.cleaned_data.get('birth_date')
+            user.save()
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=user.username, password=raw_password)
+            login(request, user)
+            return redirect('HomePage')
+    else:
+        form = SignUpForm()
+    return render(request, 'MainApp/signup.html', {'form': form})
+    
+
+def bambardier(request):
+    positions = Position.objects.all()
+    operations = Operation.objects.all()
+    for position in positions:
+        for operation in operations:
+            if operation.position == position:
+                if operation.manufactured.title == 'Опытынй завод':
+                    try:
+                        fp = Fields_Position.objects.get(position=position)
+                        fp.operation_oz = operation
+                        fp.save()
+                    except:
+                        fp = Fields_Position(position=position, operation_oz=operation)
+                        fp.save()
+                elif operation.manufactured.title == 'НИИ Лазерная Резка':
+                    try:
+                        fp = Fields_Position.objects.get(position=position)
+                        fp.operation_niilr = operation
+                        fp.save()
+                    except:
+                        fp = Fields_Position(position=position, operation_niilr=operation)
+                        fp.save()
+                elif operation.manufactured.title == 'Альянс Сталь':
+                    try:
+                        fp = Fields_Position.objects.get(position=position)
+                        fp.operation_alianse = operation
+                        fp.save()
+                    except:
+                        fp = Fields_Position(position=position, operation_alianse=operation)
+                        fp.save()
+                elif operation.manufactured.title == 'CNC MetalWork':
+                    try:
+                        fp = Fields_Position.objects.get(position=position)
+                        fp.operation_cncmw = operation
+                        fp.save()
+                    except:
+                        fp = Fields_Position(position=position, operation_cncmw=operation)
+                        fp.save()
+                elif operation.manufactured.title == 'Покрытие №1':
+                    try:
+                        fp = Fields_Position.objects.get(position=position)
+                        fp.operation_pk1 = operation
+                        fp.save()
+                    except:
+                        fp = Fields_Position(position=position, operation_pk1=operation)
+                        fp.save()
+                elif operation.manufactured.title == 'Покрытие №2':
+                    try:
+                        fp = Fields_Position.objects.get(position=position)
+                        fp.operation_pk2 = operation
+                        fp.save()
+                    except:
+                        fp = Fields_Position(position=position, operation_pk2=operation)
+                        fp.save()
+                elif operation.manufactured.title == 'Другой':
+                    try:
+                        fp = Fields_Position.objects.get(position=position)
+                        fp.operation_dr = operation
+                        fp.save()
+                    except:
+                        fp = Fields_Position(position=position, operation_dr=operation)
+                        fp.save()
+    return redirect(request.META['HTTP_REFERER'])
+
+
+def fp_view(request, url):
+    order = Order.objects.get(pk=url)
+    fps = Fields_Position.objects.filter(position__order=order)
+    ready_positions = {}
+    
+    for fp in fps:
+        ready_operations = 0
+
+        if fp.operation_oz:
+            ready_operations += int(fp.operation_oz.remaining_parts)
+        if fp.operation_niilr:
+            ready_operations += int(fp.operation_niilr.remaining_parts)
+        if fp.operation_alianse:
+            ready_operations += int(fp.operation_alianse.remaining_parts)
+        if fp.operation_cncmw:
+            ready_operations += int(fp.operation_cncmw.remaining_parts)
+        if fp.operation_pk1:
+            ready_operations += int(fp.operation_pk1.remaining_parts)
+        if fp.operation_pk2:
+            ready_operations += int(fp.operation_pk2.remaining_parts)
+        if fp.operation_dr:
+            ready_operations += int(fp.operation_dr.remaining_parts)
+
+        ready_positions[fp.position.detail.title] = ready_operations
+    
+    if request.method == 'POST':
+
+        form = OrderDRAWUploadForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            archive = form.cleaned_data.get('archive', None)
+            flag = form.cleaned_data.get('flag', None)
+            order.draw_archive = archive
+            order.save()
+            if flag:
+                print(ex_archive(order))
+            return redirect(request.META['HTTP_REFERER'])
+    else:
+
+        form = OrderDRAWUploadForm()
+    
+    context = {
+    
+        'fps': fps,
+        'order': order,
+        'ready_positions': ready_positions,
+        'form': form,
+        
+    }
+    
+    return render(request, 'MainApp/FP_VIEW.html', context)
+
+
+@login_required
+def blog_create(request):
+    
+    articles = blog.objects.all().order_by('create')
+    
+    if request.method == 'POST':
+    
+        form = blog_create_form(request.POST)
+        messages.success(request, f'post!')
+        if form.is_valid():
+        
+            atr = form.save(commit=False)
+            atr.author = request.user
+            form.save()
+            messages.success(request, f'valid!')
+            return redirect(request.META['HTTP_REFERER'])
+    else:
+        messages.success(request, f'else!')
+        form = blog_create_form()
+    
+    context = {
+        'form': form,
+        'articles': articles,
+    }
+    return render(request, 'MainApp/blog.html', context)
+
+
+def blog_delete(request, url):
+    pass
+

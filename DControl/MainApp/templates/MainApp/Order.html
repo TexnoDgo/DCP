@@ -3,6 +3,14 @@
 {% block content %}
 {% load static %}
 {% load crispy_forms_tags %}
+<style>
+.table          { overflow-y: auto; height: 100px; }
+.table thead th { position: sticky; top: 0; }
+
+table.table-bordered > tbody > tr > td{
+  border:2px solid black;
+}
+</style>
 <div class="container">
     {% if messages %}
     <ul class="messages mt-3">
@@ -72,9 +80,17 @@
     </section>
     <hr>
     <small>
+        <h4>
         ОЗ - Опытынй завод; НИИЛР - НИИ Лазерная Резка; АС - Альянс Сталь; CNCMW - CNC MetalWork; ПК1 - Покрытие №1; ПК2 - Покрытие №2; ДР - Другой; МХ - Место хранения.
+        </h4>
     </small>
-
+    <small>
+        <h4>
+            <span class="badge badge-info">Операция создана</span>
+            <span class="badge badge-warning ml-3">Деталь в работе</span>
+            <span class="badge badge-success ml-3">Деталь готова</span>
+        </h4>
+    </small>
     <table class="table table-bordered col mt-2" style="font-size: 0.8em;">
         <thead class="thead-dark">
             <tr align="center">
@@ -120,7 +136,13 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "Опытынй завод" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                                {% if operation.status == 'CD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-info">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'PD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-warning">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'RD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-success">{{operation.remaining_parts}}</a>
+                                {% endif %}
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -129,7 +151,13 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "НИИ Лазерная Резка" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                                {% if operation.status == 'CD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-info">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'PD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-warning">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'RD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-success">{{operation.remaining_parts}}</a>
+                                {% endif %}
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -138,7 +166,13 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "Альянс Сталь" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                                {% if operation.status == 'CD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-info">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'PD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-warning">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'RD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-success">{{operation.remaining_parts}}</a>
+                                {% endif %}
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -147,7 +181,13 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "CNC MetalWork" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                                {% if operation.status == 'CD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-info">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'PD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-warning">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'RD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-success">{{operation.remaining_parts}}</a>
+                                {% endif %}
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -156,7 +196,13 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "Покрытие №1" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                                {% if operation.status == 'CD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-info">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'PD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-warning">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'RD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-success">{{operation.remaining_parts}}</a>
+                                {% endif %}
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -165,7 +211,13 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "Покрытие №2" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                                {% if operation.status == 'CD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-info">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'PD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-warning">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'RD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-success">{{operation.remaining_parts}}</a>
+                                {% endif %}
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -174,7 +226,13 @@
                     {% for operation in operations %}
                         {% if operation.position == position %}
                             {% if operation.manufactured.title == "Другой" %}
-                                <span class="badge badge-pill badge-info">{{operation.remaining_parts}}</span>
+                                {% if operation.status == 'CD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-info">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'PD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-warning">{{operation.remaining_parts}}</a>
+                                {% elif operation.status == 'RD' %}
+                                    <a href="{% url 'order_operation_change_status' url=operation.pk %}" class="badge badge-pill badge-success">{{operation.remaining_parts}}</a>
+                                {% endif %}
                             {% endif %}
                         {% endif %}
                     {% endfor %}
@@ -188,4 +246,21 @@
         </tbody>
     </table>
 </div>
+<script>
+    var $th = $('.tableFixHead').find('thead th')
+    $('.tableFixHead').on('scroll', function() {
+      $th.css('transform', 'translateY('+ this.scrollTop +'px)');
+    });
+</script>
+<script src="https://code.jquery.com/jquery-3.1.0.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function(event) {
+        var scrollpos = localStorage.getItem('scrollpos');
+        if (scrollpos) window.scrollTo(0, scrollpos);
+    });
+
+    window.onbeforeunload = function(e) {
+        localStorage.setItem('scrollpos', window.scrollY);
+    };
+</script>
 {% endblock %}

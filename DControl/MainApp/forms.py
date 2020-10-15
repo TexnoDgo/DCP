@@ -1,5 +1,7 @@
 from django import forms
-from .models import Material, Assortment, Detail, Project, Order, Position, City, Manufactured, Operation, Transaction
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from .models import Assortment, Detail, Project, Order, Position, City, Manufactured, Operation, Transaction, blog
 
 
 class ProjectCreateForm(forms.ModelForm):
@@ -8,10 +10,10 @@ class ProjectCreateForm(forms.ModelForm):
         fields = ['title']
 
 
-class MaterialCreateForm(forms.ModelForm):
+'''class MaterialCreateForm(forms.ModelForm):
     class Meta:
         model = Material
-        fields = ['title']
+        fields = ['title']'''
 
 
 class AssortmentCreateForm(forms.ModelForm):
@@ -59,6 +61,15 @@ class PositionDrawAdd(forms.Form):
     draw = forms.FileField()
     fields = ['draw']
 
+class PasitionAddForm(forms.Form):
+    detail_title = forms.CharField(max_length=50)
+    quantity = forms.CharField(max_length=10)
+    material = forms.CharField(max_length=50)
+    assortment = forms.CharField(max_length=50)
+    thickness_diameter = forms.CharField(max_length=10)
+    
+    fields = ['detail_title', 'quantity', 'material', 'assortment', 'thickness_diameter']
+
 
 class PositionSearch(forms.Form):
     my_request = forms.CharField(max_length=50)
@@ -80,10 +91,25 @@ class ManufacturedCreateForm(forms.ModelForm):
 class OperationCreateForm(forms.ModelForm):
     class Meta:
         model = Operation
-        fields = ['title', 'manufactured', 'position', 'remaining_parts']
+        fields = ['manufactured']
 
 
 class TransactionCreateForm(forms.ModelForm):
     class Meta:
         model = Transaction
         fields = ['ready_quantity']
+
+
+class SignUpForm(UserCreationForm):
+
+    class Meta:
+        model = User
+        fields = ('username', 'password1', 'password2', )
+
+
+class blog_create_form(forms.ModelForm):
+
+    class Meta:
+        model = blog
+        fields = ['title', 'text']
+        
